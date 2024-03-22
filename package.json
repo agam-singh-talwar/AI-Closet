@@ -1,0 +1,23 @@
+{
+  "name": "ai-clauset",
+  "version": "1.0.0",
+  "description": "final-project-mdmytrenko-astalwar created by GitHub Classroom",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dps970/final-project-mdmytrenko-astalwar.git"
+  },
+  "author": "Maria & Agam",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dps970/final-project-mdmytrenko-astalwar/issues"
+  },
+  "homepage": "https://github.com/dps970/final-project-mdmytrenko-astalwar#readme",
+  "dependencies": {
+    "express": "^4.19.1",
+    "nodemon": "^3.1.0"
+  }
+}
