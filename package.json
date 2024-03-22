@@ -17,7 +17,9 @@
   },
   "homepage": "https://github.com/dps970/final-project-mdmytrenko-astalwar#readme",
   "dependencies": {
+    "dotenv": "^16.4.5",
     "express": "^4.19.1",
+    "mongoose": "^8.2.3",
     "nodemon": "^3.1.0"
   }
 }
