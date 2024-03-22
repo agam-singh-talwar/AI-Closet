@@ -60,14 +60,38 @@ app.post("/signup", (request, response) => {
     // signup
 });
 
-// the next couple of routes require middleware to not allow outside access
+// the next several of routes require middleware to not allow outside access
 
-// app.get("/account", checkAuthorization, (request, response) => {
-//     // render account page, etc...
+// app.get("/home", checkAuthorization, (request, response) => {
+//     // render (user) home page
 // });
 
-// app.post("/account", checkAuthorization, (request, response) => {
+// app.put("/home", checkAuthorization, (request, response) => {
+//     // update outfits on the (user) home page
+// });
+
+// app.get("/account", checkAuthorization, (request, response) => {
+//     // render account page
+// });
+
+// app.put("/account", checkAuthorization, (request, response) => {
 //     // update account
+// });
+
+// app.get("/wardrobe", checkAuthorization, (request, response) => {
+//     // render virtual wardrobe page
+// });
+
+// app.post("/addcloth", checkAuthorization, (request, response) => {
+//     // add user cloth
+// });
+
+// app.put("/addcloth", checkAuthorization, (request, response) => {
+//     // update user cloth
+// });
+
+// app.delete("/addcloth", checkAuthorization, (request, response) => {
+//     // delete user cloth
 // });
 
 app.get("/logout", (request, response) => {
