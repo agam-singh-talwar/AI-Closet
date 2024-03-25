@@ -40,11 +40,13 @@ const userSchema = new Schema({
     type: String,
     required: true
   },
+  location: {
+    type: String
+  },
   createdAt: {
     type: Date,
     default: Date.now
   },
   clauset: [clothSchema] // Define an array of cloth objects using the clothSchema
 });
-
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('User', userSchema, 'AI_clauset');

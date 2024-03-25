@@ -17,11 +17,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 //app routes
-app.get("/", (request, response) => {
-    console.log("/")
+app.get("/", async (request, response) => {
     response.status(200).render("index", { title: "Not Found" });
 });
-
+// // testing route
+// app.get("/test",async(req,res)=>{
+//     // 
+//     const user = new User({"name": "agam" , "email": "agam@agam.com", "password":"password"});
+//     // const u = await user.save();
+//     const u = await User.find({"name":"agam"});
+//     res.status(201).send(u)
+// })
 app.get("/login", (request, response) => {
     // render login page
 });
@@ -35,7 +41,7 @@ app.post("/login", async (request, response) => {
             response.status(201).send("logged IN")
         }
         else{
-            response.status(401).send("not acount found!")
+            response.status(401).send("no account found!")
         }
     } catch (err){
         console.log(err);
@@ -79,9 +85,21 @@ app.post("/signup", async (request, response) => {
 //     // render account page
 // });
 
-// app.put("/account", checkAuthorization, (request, response) => {
-//     // update account
-// });
+app.put("/account", checkAuthorization, async (request, response) => {
+    // update account
+    const id = request.params
+    const {nam, eml, loc} = request.body;
+    try{
+    const usr = await User.findOneAndUpdate({_id: id},{name: nam, eml: email, locaiton: loc})
+    if (usr != null){
+        response.status(201).send(usr)
+    }
+    } catch(err){
+        if (usr == null){
+            response.status(501).send("Unable to update the account!")
+        }
+    }
+});
 
 // app.get("/wardrobe", checkAuthorization, (request, response) => {
 //     // render virtual wardrobe page
