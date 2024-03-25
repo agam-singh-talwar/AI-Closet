@@ -1,12 +1,13 @@
+const { hashPassword, comparePasswords } = require("./db/authUtility");
 const express = require("express");
-const mongoose = require('mongoose');
-const path = require('path');
-require('dotenv').config();
+const mongoose = require("mongoose");
+const path = require("path");
+require("dotenv").config();
 
 // import db connection object
-const db = require("./db/index")
+const db = require("./db/index");
 // get the User Schema
-const User = require('./db/model')
+const User = require("./db/model");
 //set up application
 const PORT = process.env.PORT || 8080;
 const app = express();
@@ -14,61 +15,67 @@ const app = express();
 //set up middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
 //app routes
 app.get("/", async (request, response) => {
-    response.status(200).render("index", { title: "Not Found" });
+  response.status(200).render("index", { title: "Not Found" });
 });
-// // testing route
+// /testing route
 // app.get("/test",async(req,res)=>{
-//     // 
+//     //
 //     const user = new User({"name": "agam" , "email": "agam@agam.com", "password":"password"});
-//     // const u = await user.save();
+//      const u = await user.save();
 //     const u = await User.find({"name":"agam"});
 //     res.status(201).send(u)
 // })
 app.get("/login", (request, response) => {
-    // render login page
+  // render login page
 });
 
 app.post("/login", async (request, response) => {
-    // login 
-    const {nam, pass}= request.body
-    try{
-        const usr = await User.find({name: nam}, {password: pass})
-        if (usr == null ){
-            response.status(201).send("logged IN")
-        }
-        else{
-            response.status(401).send("no account found!")
-        }
-    } catch (err){
-        console.log(err);
-        response.status(500).send(err)
+  // login
+  const { nam, pass } = request.body;
+  const hashedpass = await hashPassword(password);
+  try {
+    const usr = await User.find({ name: nam });
+    if (usr != null) {
+      if (comparePasswords(pass, usr.password)) {
+        response.status(201).send("logged IN");
+      }
+    } else {
+      response.status(401).send("no account found!");
     }
+  } catch (err) {
+    console.log(err);
+    response.status(500).send(err);
+  }
 });
 
 app.get("/signup", (request, response) => {
-    // render signup page
-    
+  // render signup page
+  response.status(200).send("signup page");
 });
 
 app.post("/signup", async (request, response) => {
-    // signup
-    // Create a user
-    console.log(request.body)
-    const {name, email, password} = request.body;
-    try{
-        const user = new User({name, email, password});
-        await user.save();
-        // sending user only for testing, later it should redirect to a different page
-        response.status(201).send(user);
-    } catch (err){
-        console.log(err);
-        response.status(500).send(err)
-    }
-
+  // signup
+  // Create a user
+  console.log(request.body);
+  try {
+    const hashedpass = await hashPassword(request.body.password);
+    const user = new User({
+      name: request.body.name,
+      password: hashedpass,
+      email: request.body.email,
+      location: request.body.location,
+    });
+    await user.save();
+    // sending user only for testing, later it should redirect to a different page
+    response.status(201).send(user);
+  } catch (err) {
+    console.log(err);
+    response.status(501).send(err);
+  }
 });
 
 // the next several of routes require middleware to not allow outside access
@@ -85,21 +92,24 @@ app.post("/signup", async (request, response) => {
 //     // render account page
 // });
 
-app.put("/account", checkAuthorization, async (request, response) => {
-    // update account
-    const id = request.params
-    const {nam, eml, loc} = request.body;
-    try{
-    const usr = await User.findOneAndUpdate({_id: id},{name: nam, eml: email, locaiton: loc})
-    if (usr != null){
-        response.status(201).send(usr)
-    }
-    } catch(err){
-        if (usr == null){
-            response.status(501).send("Unable to update the account!")
-        }
-    }
-});
+// app.put("/account", checkAuthorization, async (request, response) => {
+//   // update account
+//   const id = request.params;
+//   const { nam, eml, loc } = request.body;
+//   try {
+//     const usr = await User.findOneAndUpdate(
+//       { _id: id },
+//       { name: nam, eml: email, locaiton: loc }
+//     );
+//     if (usr != null) {
+//       response.status(201).send(usr);
+//     }
+//   } catch (err) {
+//     if (usr == null) {
+//       response.status(501).send("Unable to update the account!");
+//     }
+//   }
+// });
 
 // app.get("/wardrobe", checkAuthorization, (request, response) => {
 //     // render virtual wardrobe page
@@ -109,108 +119,108 @@ app.put("/account", checkAuthorization, async (request, response) => {
 
 // Create a new cloth for a user
 app.post("/users/:userId/cloths", async (req, res) => {
-    const { userId } = req.params;
-    const { name, color, type, occasion, temperature } = req.body;
-    try {
-        // Find the user by ID
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).send("User not found");
-        }
-        // Create a new cloth object
-        const cloth = {
-            name,
-            color,
-            type,
-            occasion,
-            temperature
-        };
-        // Add the new cloth to the user's cloth array
-        user.clauset.push(cloth);
-        // Save the updated user object
-        await user.save();
-        res.status(201).send(user);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send("Server Error");
+  const { userId } = req.params;
+  const { name, color, type, occasion, temperature } = req.body;
+  try {
+    // Find the user by ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send("User not found");
     }
+    // Create a new cloth object
+    const cloth = {
+      name,
+      color,
+      type,
+      occasion,
+      temperature,
+    };
+    // Add the new cloth to the user's cloth array
+    user.clauset.push(cloth);
+    // Save the updated user object
+    await user.save();
+    res.status(201).send(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
 });
 
 // Read all cloths of a user
 app.get("/users/:userId/cloths", async (req, res) => {
-    const { userId } = req.params;
-    try {
-        // Find the user by ID and return the cloths array
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).send("User not found");
-        }
-        res.status(200).send(user.clauset);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send("Server Error");
+  const { userId } = req.params;
+  try {
+    // Find the user by ID and return the cloths array
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send("User not found");
     }
+    res.status(200).send(user.clauset);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
 });
 
 // Update a cloth of a user
 app.put("/users/:userId/cloths/:clothId", async (req, res) => {
-    const { userId, clothId } = req.params;
-    const { name, color, type, occasion, temperature } = req.body;
-    try {
-        // Find the user by ID
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).send("User not found");
-        }
-        // Find the cloth by ID
-        const cloth = user.clauset.id(clothId);
-        if (!cloth) {
-            return res.status(404).send("Cloth not found");
-        }
-        // Update cloth properties
-        cloth.set({
-            name,
-            color,
-            type,
-            occasion,
-            temperature
-        });
-        // Save the updated user object
-        await user.save();
-        res.status(200).send(user);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send("Server Error");
+  const { userId, clothId } = req.params;
+  const { name, color, type, occasion, temperature } = req.body;
+  try {
+    // Find the user by ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send("User not found");
     }
+    // Find the cloth by ID
+    const cloth = user.clauset.id(clothId);
+    if (!cloth) {
+      return res.status(404).send("Cloth not found");
+    }
+    // Update cloth properties
+    cloth.set({
+      name,
+      color,
+      type,
+      occasion,
+      temperature,
+    });
+    // Save the updated user object
+    await user.save();
+    res.status(200).send(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
 });
 
 // Delete a cloth of a user
 app.delete("/users/:userId/cloths/:clothId", async (req, res) => {
-    const { userId, clothId } = req.params;
-    try {
-        // Find the user by ID
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).send("User not found");
-        }
-        // Remove the cloth by ID
-        user.clauset.id(clothId).remove();
-        // Save the updated user object
-        await user.save();
-        res.status(200).send(user);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send("Server Error");
+  const { userId, clothId } = req.params;
+  try {
+    // Find the user by ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send("User not found");
     }
+    // Remove the cloth by ID
+    user.clauset.id(clothId).remove();
+    // Save the updated user object
+    await user.save();
+    res.status(200).send(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
 });
 
 app.get("/logout", (request, response) => {
-    // reset session and redirect to the main home page
+  // reset session and redirect to the main home page
 });
 app.get("/*", (request, response) => {
-    // render page 404
+  // render page 404
 });
 
-app.listen(PORT, ()=>{
-    console.log(`Server started on port ${PORT}`);
-})
+app.listen(PORT, () => {
+  console.log(`Server started on port ${PORT}`);
+});

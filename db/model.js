@@ -1,52 +1,52 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const clothSchema = new Schema({
   name: {
     type: String,
-    required: true
+    required: true,
   },
   color: {
     type: String,
-    required: true
+    required: true,
   },
-//   type: upper or lower
-  type:{ 
+  //   type: upper or lower
+  type: {
     type: String,
-    required: true
+    required: true,
   },
-//   ocassion: formal, casual, sporty
+  //   ocassion: formal, casual, sporty
   occasion: {
     type: String,
-    required: true
+    required: true,
   },
   temperature: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 });
 
 const userSchema = new Schema({
   name: {
     type: String,
-    required: true
+    required: true,
   },
   email: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
   password: {
     type: String,
-    required: true
+    required: true,
   },
   location: {
-    type: String
+    type: String,
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
-  clauset: [clothSchema] // Define an array of cloth objects using the clothSchema
+  clauset: [clothSchema], // Define an array of cloth objects using the clothSchema
 });
-module.exports = mongoose.model('User', userSchema, 'AI_clauset');
+module.exports = mongoose.model("User", userSchema, "AI_clauset");
