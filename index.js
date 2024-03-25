@@ -35,16 +35,23 @@ app.get("/login", (request, response) => {
 
 app.post("/login", async (request, response) => {
   // login
-  const { nam, pass } = request.body;
-  const hashedpass = await hashPassword(password);
   try {
-    const usr = await User.find({ name: nam });
-    if (usr != null) {
-      if (comparePasswords(pass, usr.password)) {
-        response.status(201).send("logged IN");
-      }
+    const hashedPassword = await hashPassword(request.body.password);
+    const user = await User.findOne({ name: request.body.name });
+
+    if (!user) {
+      response.status(401).send("No account found!");
     } else {
-      response.status(401).send("no account found!");
+      const isPasswordMatch = await comparePasswords(
+        request.body.password,
+        user.password
+      );
+
+      if (isPasswordMatch) {
+        response.status(200).send("Logged in successfully");
+      } else {
+        response.status(401).send("Incorrect password");
+      }
     }
   } catch (err) {
     console.log(err);
