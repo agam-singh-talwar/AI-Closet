@@ -1,3 +1,8 @@
+body,
+html {
+    color: #fff;
+}
+
 .section {
     display: flex;
     flex-direction: column;
@@ -8,12 +13,14 @@
 }
 
 /* Main Section on the landing page */
-#intro-img {
-    height: 100vh;
+#navbar {
+    background-color: transparent;
+}
+
+#main {
     background-image: url('../img/landing-page-bg.jpg');
     background-size: cover;
     background-position: center;
-    position: relative;
 }
 
 #intro-section {
