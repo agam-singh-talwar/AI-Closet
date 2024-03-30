@@ -66,7 +66,7 @@ app.get("/login", ifNotAuthenticated, (request, response) => {
 app.post("/login", ifNotAuthenticated, async (request, response) => {
   try {
     const hashedPassword = await hashPassword(request.body.password);
-    const user = await User.findOne({ name: request.body.name });
+    const user = await User.findOne({ email: request.body.email });
 
     if (!user) {
       response.status(401).render("login", { 
