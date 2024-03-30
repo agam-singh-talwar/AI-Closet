@@ -1,3 +1,8 @@
+{{#if session.user}}
+<div style="background-color: black;" class="section">
+    <h1>Home Page</h1>
+</div>
+{{else}}
 <div id="intro-bg-img">
     <div id="intro-section" class="section">
          <h1>Welcome to AI Clauset</h1>
@@ -32,3 +37,4 @@
     <br><br>
     <button type="button" class="btn btn-outline-light btn-lg">Try it now</button>
 </div>
+{{/if}}

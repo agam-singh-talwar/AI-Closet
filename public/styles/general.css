@@ -35,6 +35,15 @@ a {
     align-items: center;
 }
 
+#authNavLinks > * {
+    padding-left: 30px;
+}
+
+#authNavLinks > *:hover {
+    text-decoration: underline;
+    text-underline-offset: 5px;
+}
+
 /* Section Default Settings */
 .section {
     display: flex;
@@ -125,6 +134,17 @@ li:hover {
     width: 100%;
     display: flex;
     flex-direction: column;
+    align-items: center;
+}
+
+#getin #error {
+    width: min(300px, 90%);
+    height: 40px;
+    padding: 0 13px;
+    background-color: rgba(255, 105, 105, 0.8);
+    border: none;
+
+    display: flex;
     align-items: center;
 }
 

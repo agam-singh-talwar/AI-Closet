@@ -21,10 +21,12 @@
     <div id="navbar" class="d-flex justify-content-between">
         <h2 class="anton-regular">AI Clauset</h2>
         {{#if session.user}}
-        <a href="/account">My Account</a>
-        <a href="/logout">Logout</a>
+        <div id="authNavLinks">
+            <a href="/account">My Account</a>
+            <a href="/logout">Logout</a>
+        </div>
         {{else}}
-        <div id="navlinks">
+        <div>
             <a href="/signup">
                 <button type="button" class="btn btn-outline-light" id="getin-btn" >Sign Up</button>
             </a>

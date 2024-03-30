@@ -7,7 +7,7 @@ const path = require("path");
 require("dotenv").config();
 
 // import db connection object
-//const db = require("./db/index");
+const db = require("./db/index");
 // get the User Schema
 const User = require("./db/model");
 //set up application
@@ -64,13 +64,15 @@ app.get("/login", ifNotAuthenticated, (request, response) => {
 });
 
 app.post("/login", ifNotAuthenticated, async (request, response) => {
-  // login
   try {
     const hashedPassword = await hashPassword(request.body.password);
     const user = await User.findOne({ name: request.body.name });
 
     if (!user) {
-      response.status(401).send("No account found!");
+      response.status(401).render("login", { 
+        title: "Login",
+        error: "No account found."
+      });
     } else {
       const isPasswordMatch = await comparePasswords(
         request.body.password,
@@ -78,14 +80,24 @@ app.post("/login", ifNotAuthenticated, async (request, response) => {
       );
 
       if (isPasswordMatch) {
-        response.status(200).send("Logged in successfully");
+        request.session.user = { name: user.name };
+        response.status(200).render("index", { 
+          title: "Home",
+          user: request.session.user 
+        });
       } else {
-        response.status(401).send("Incorrect password");
+        response.status(401).render("login", { 
+          title: "Login",
+          error: "Incorrect credentials."
+        });
       }
     }
   } catch (err) {
     console.log(err);
-    response.status(500).send(err);
+    response.status(500).render("login", { 
+      title: "Login",
+      error: "Ooops something is wrong."
+    });
   }
 });
 
@@ -94,9 +106,6 @@ app.get("/signup", ifNotAuthenticated, (request, response) => {
 });
 
 app.post("/signup", ifNotAuthenticated, async (request, response) => {
-  // signup
-  // Create a user
-  console.log(request.body);
   try {
     const hashedpass = await hashPassword(request.body.password);
     const user = new User({
@@ -106,11 +115,18 @@ app.post("/signup", ifNotAuthenticated, async (request, response) => {
       location: request.body.location,
     });
     await user.save();
-    // sending user only for testing, later it should redirect to a different page
-    response.status(201).send(user);
+
+    request.session.user = { name: user.name };
+    response.status(201).render("index", { 
+      title: "Home",
+      user: request.session.user 
+    });
   } catch (err) {
     console.log(err);
-    response.status(501).send(err);
+    response.status(501).render("signup", { 
+      title: "Sign Up",
+      error: "Ooops something is wrong."
+    });
   }
 });
 
