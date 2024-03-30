@@ -1,0 +1,109 @@
+body,
+html {
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box;
+    color: #fff;
+
+    height: 100%;
+    width: 100%;
+
+    font-family: "Open Sans", "Arial", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100%;
+    width: 100%;
+}
+
+/* Main Section on the landing page */
+#intro-img {
+    height: 100vh;
+    background-image: url('../img/landing-page-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+#intro-section {
+    background-color: rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+/* Navbar on the landing page*/
+.anton-regular {
+    font-family: "Anton", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+#navbar {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    padding: 20px 50px;
+}
+
+#intro h1 {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 96px;
+    font-weight: 700;
+}
+
+#getin-btn {
+    border: none !important;
+}
+
+/* Info Section on the landing page*/
+#info-section {
+    background-color: rgb(40, 42, 40);
+    justify-content: start;
+    padding: 75px;
+    font-size: 17px;
+}
+
+#info-section h1 {
+    font-size: 70px;
+    font-weight: 700;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgb(125, 125, 125);
+    margin: 10px;
+    transition: background-color 0.5s, color 0.5s;
+}
+
+li:hover {
+    background-color: rgb(255, 255, 255);
+    color:rgb(40, 42, 40);
+}
+
+.circle {
+    text-align: center;
+    width: 200px;
+    margin: 15px 50px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Footer */
+.footer {
+    background-color: #333;
+    text-align: center;
+}
