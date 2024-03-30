@@ -1,11 +1,13 @@
 const { hashPassword, comparePasswords } = require("./db/authUtility");
+const hbs = require('express-handlebars');
+const sessions = require('client-sessions');
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
 require("dotenv").config();
 
 // import db connection object
-const db = require("./db/index");
+//const db = require("./db/index");
 // get the User Schema
 const User = require("./db/model");
 //set up application
@@ -17,9 +19,30 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use(sessions({
+  cookieName: "session",
+  secret: "ai-clauset",
+  duration: 24 * 60 * 60 * 1000,
+  activeDuration: 1000 * 60 * 5
+}));
+app.use((request, response, next) => {
+  response.locals.session = request.session;
+  next();
+});
+
+app.engine("hbs", hbs.engine({
+  extname: "hbs",
+  defaultLayout: 'main',
+}));
+app.set('view engine', 'hbs');
+app.set('views', path.join(__dirname, './views'));
+
 //app routes
 app.get("/", async (request, response) => {
-  response.status(200).render("index", { title: "Not Found" });
+  response.status(200).render("index", {
+    user: request.session.user,
+    title: "AI Clauset"
+  });
 });
 // /testing route
 // app.get("/test",async(req,res)=>{
@@ -225,7 +248,7 @@ app.get("/logout", (request, response) => {
   // reset session and redirect to the main home page
 });
 app.get("/*", (request, response) => {
-  // render page 404
+  response.status(404).render("page404", { title: "Not Found" });
 });
 
 app.listen(PORT, () => {
