@@ -11,6 +11,7 @@ html {
     font-family: "Open Sans", "Arial", sans-serif;
     font-weight: 400;
     font-style: normal;
+    font-size: 17px;
 }
 
 a {
@@ -71,7 +72,6 @@ a {
     background-color: rgb(40, 42, 40);
     justify-content: start;
     padding: 75px;
-    font-size: 17px;
 }
 
 #info-section h1 {
@@ -108,10 +108,42 @@ li:hover {
     align-items: center;
 }
 
-/* 404 page */
-#not-found {
+/* 404 page, Login/Signup Page */
+#not-found,
+#getin {
     background-color: rgb(40, 42, 40);
-    margin-bottom: -24px;
+    margin-bottom: -25.5px;
+}
+
+#getin h1 {
+    font-size: 60px;
+    font-weight: 750;
+}
+
+#getin form {
+    margin: 0 50px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#getin input,
+#getin button {
+    width: min(300px, 90%);
+    border: 3px solid rgb(255, 255, 255);
+    transition: all 0.5s;
+}
+
+#getin input:active,
+#getin input:focus {
+    border: 3px solid rgb(0, 255, 234);
+}
+
+#getin button:hover {
+    border: 3px solid rgb(0, 255, 234);
+    background-color: rgb(0, 255, 234);
+    font-weight: 700;
 }
 
 /* Footer */

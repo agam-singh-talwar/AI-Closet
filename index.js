@@ -37,6 +37,13 @@ app.engine("hbs", hbs.engine({
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, './views'));
 
+const ifNotAuthenticated = (request, response, next) => {
+  if (request.session.user)
+    response.redirect("/");
+  else
+    next();
+}
+
 //app routes
 app.get("/", async (request, response) => {
   response.status(200).render("index", {
@@ -52,11 +59,11 @@ app.get("/", async (request, response) => {
 //     const u = await User.find({"name":"agam"});
 //     res.status(201).send(u)
 // })
-app.get("/login", (request, response) => {
-  // render login page
+app.get("/login", ifNotAuthenticated, (request, response) => {
+  response.status(200).render("login", { title: "Login" });
 });
 
-app.post("/login", async (request, response) => {
+app.post("/login", ifNotAuthenticated, async (request, response) => {
   // login
   try {
     const hashedPassword = await hashPassword(request.body.password);
@@ -82,12 +89,11 @@ app.post("/login", async (request, response) => {
   }
 });
 
-app.get("/signup", (request, response) => {
-  // render signup page
-  response.status(200).send("signup page");
+app.get("/signup", ifNotAuthenticated, (request, response) => {
+  response.status(200).render("signup", { title: "Sign Up" });
 });
 
-app.post("/signup", async (request, response) => {
+app.post("/signup", ifNotAuthenticated, async (request, response) => {
   // signup
   // Create a user
   console.log(request.body);
