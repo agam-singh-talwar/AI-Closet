@@ -267,7 +267,8 @@ app.delete("/users/:userId/cloths/:clothId", async (req, res) => {
 });
 
 app.get("/logout", (request, response) => {
-  // reset session and redirect to the main home page
+  request.session.reset();
+  response.redirect('/');
 });
 app.get("/*", (request, response) => {
   response.status(404).render("page404", { title: "Not Found" });

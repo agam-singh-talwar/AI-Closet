@@ -21,6 +21,7 @@
     <div id="navbar" class="d-flex justify-content-between">
         <h2 class="anton-regular">AI Clauset</h2>
         {{#if session.user}}
+        <h3>Hello, {{session.user.name}}</h3>
         <div id="authNavLinks">
             <a href="/account">My Account</a>
             <a href="/logout">Logout</a>
