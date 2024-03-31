@@ -285,6 +285,11 @@ li:hover {
     margin: 0 !important;
 }
 
+#wardrobe #card-btns form {
+    padding: 0;
+    margin: 0;
+}
+
 #wardrobe #card-btns button {
     text-decoration: underline;
     text-underline-offset: 3px;

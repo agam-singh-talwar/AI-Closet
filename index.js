@@ -30,9 +30,16 @@ app.use((request, response, next) => {
   next();
 });
 
+
+
 app.engine("hbs", hbs.engine({
   extname: "hbs",
   defaultLayout: 'main',
+  helpers: {
+    select: function (selected, options) {
+      return options.fn(this).replace(new RegExp(' value=\"' + selected + '\"'), '$& selected="selected"');
+    }
+  }
 }));
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, './views'));
@@ -250,8 +257,7 @@ app.post("/account", ifAuthenticated, async (request, response) => {
 });
 
 app.get("/wardrobe", ifAuthenticated, async (request, response) => {
-
-  const { success, error } = request.query;
+  const { success, updated, deleted, error } = request.query;
 
   try {
     const user = await User.findOne({ email: request.session.user.email }).lean();
@@ -265,6 +271,20 @@ app.get("/wardrobe", ifAuthenticated, async (request, response) => {
           clauset: request.session.user.clauset,
           message: "Cloth added successfully."
         });
+      } else if (updated) {
+        response.status(200).render("wardrobe", {
+          user: request.session.user,
+          title: "My Wardrobe",
+          clauset: request.session.user.clauset,
+          message: "Cloth updated successfully."
+        });
+      }else if (deleted) {
+        response.status(200).render("wardrobe", {
+          user: request.session.user,
+          title: "My Wardrobe",
+          clauset: request.session.user.clauset,
+          message: "Cloth deleted successfully."
+        });
       } else if (error) {
         response.status(500).render("wardrobe", {
           user: request.session.user,
@@ -272,7 +292,8 @@ app.get("/wardrobe", ifAuthenticated, async (request, response) => {
           clauset: request.session.user.clauset,
           error: "Ooops something is wrong."
         });
-      } else {
+      }
+      else {
         response.status(200).render("wardrobe", {
           user: request.session.user,
           title: "My Wardrobe",
@@ -288,7 +309,7 @@ app.get("/wardrobe", ifAuthenticated, async (request, response) => {
   }
 });
 
-app.post("/addcloth", ifAuthenticated, async (request, response) => {
+app.post("/cloth/add", ifAuthenticated, async (request, response) => {
   const { name, color, type, occasion, temperature } = request.body;
   try {
     const user = await User.findOne({ email: request.session.user.email });
@@ -320,34 +341,29 @@ app.post("/addcloth", ifAuthenticated, async (request, response) => {
   }
 });
 
-app.post("/cloth/edit/:id", async (req, res) => {
-  const { userId, clothId } = req.params;
-  const { name, color, type, occasion, temperature } = req.body;
+app.post("/cloth/edit/:id", ifAuthenticated, async (request, response) => {
+  const { id } = request.params;
+  const { name, color, type, occasion, temperature } = request.body;
   try {
-    // Find the user by ID
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).send("User not found");
+    const user = await User.findOne({ email: request.session.user.email });
+    if (user) {
+
+      User.updateOne({ email: request.session.user.email, "clauset._id": id }, {
+        $set: {
+          "clauset.$.name": name,
+          "clauset.$.color": color,
+          "clauset.$.type": type,
+          "clauset.$.occasion": occasion,
+          "clauset.$.temperature": temperature
+        }
+      }).then(() => {
+        response.status(200).redirect("/wardrobe?updated=true");
+      });
+    } else {
+      response.status(404).redirect("/wardrobe?error=true");
     }
-    // Find the cloth by ID
-    const cloth = user.clauset.id(clothId);
-    if (!cloth) {
-      return res.status(404).send("Cloth not found");
-    }
-    // Update cloth properties
-    cloth.set({
-      name,
-      color,
-      type,
-      occasion,
-      temperature,
-    });
-    // Save the updated user object
-    await user.save();
-    res.status(200).send(user);
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Server Error");
+    response.status(500).redirect("/wardrobe?error=true");
   }
 });
 
@@ -359,10 +375,9 @@ app.post("/cloth/delete/:id", ifAuthenticated, async (request, response) => {
     if (user) {
 
       User.updateOne({ email: request.session.user.email }, { $pull: { clauset: { _id: id } } }).then(() => {
-        request.session.user.clauset = user.clauset;
-        response.status(201).redirect("/wardrobe");
+        response.status(201).redirect("/wardrobe?deleted=true");
       });
-      
+
     } else {
       response.status(404).redirect("/wardrobe?error=true");
     }
@@ -375,6 +390,7 @@ app.get("/logout", (request, response) => {
   request.session.reset();
   response.redirect('/');
 });
+
 app.get("/*", (request, response) => {
   response.status(404).render("page404", { title: "Not Found" });
 });
