@@ -87,8 +87,7 @@ app.post("/login", ifNotAuthenticated, async (request, response) => {
       );
 
       if (isPasswordMatch) {
-        console.log(user);
-        request.session.user = { name: user.name, email: user.email, location: user.location };
+        request.session.user = { name: user.name, email: user.email, latitude: user.latitude, longitude: user.longitude };
         response.status(200).render("index", {
           title: "Home",
           user: request.session.user
@@ -124,7 +123,7 @@ app.post("/signup", ifNotAuthenticated, async (request, response) => {
     });
     await user.save();
 
-    request.session.user = { name: user.name, email: user.email, location: user.location };
+    request.session.user = { name: user.name, email: user.email, latitude: user.latitude, longitude: user.longitude };
     response.status(201).render("index", {
       title: "Home",
       user: request.session.user
@@ -159,7 +158,7 @@ app.get("/account", ifAuthenticated, async (request, response) => {
       const res = await fetch(url);
       const data = await res.json();
 
-      let modifiedUser = { ...request.session.user};  // clone without link
+      let modifiedUser = { ...request.session.user };  // clone without link
       modifiedUser.name = request.query.name;
       modifiedUser.email = request.query.email;
       modifiedUser.latitude = latitude;
@@ -189,23 +188,51 @@ app.get("/account", ifAuthenticated, async (request, response) => {
     });
 });
 
-
-app.put("/account", ifAuthenticated, async (request, response) => {
-  // update account
-  const id = request.params;
-  const { nam, eml, loc } = request.body;
+app.post("/account", ifAuthenticated, async (request, response) => {
+  const { name, email, lat, lon, newPass, currentPass } = request.body;
   try {
-    const usr = await User.findOneAndUpdate(
-      { _id: id },
-      { name: nam, eml: email, locaiton: loc }
-    );
-    if (usr != null) {
-      response.status(201).send(usr);
+    const user = await User.findOne({ email: request.session.user.email });
+
+    if (user != null) {
+      const isPasswordMatch = await comparePasswords(
+        currentPass,
+        user.password
+      );
+
+      if (isPasswordMatch) {
+        let hashedpass;
+        if (newPass != "")
+          hashedpass = await hashPassword(newPass);
+        else
+          hashedpass = user.password;
+
+        User.updateOne(
+          { email: request.session.user.email },
+          { $set: { "name": name, "email": email, "password": hashedpass, "location": [{ "latitude": lat, "longitude": lon }] } }
+        ).then(() => {
+          request.session.user = { name: name, email: email, latitude: lat, longitude: lon };
+          response.status(200).render("account", {
+            title: "My Account",
+            user: request.session.user,
+            message: "Account updated successfully."
+          });
+        });
+      } else {
+        response.status(401).render("account", {
+          user: request.session.user,
+          modifiedUser: request.session.user,
+          title: "My Account",
+          message: "Incorrect password."
+        });
+      }
     }
   } catch (err) {
-    if (usr == null) {
-      response.status(501).send("Unable to update the account!");
-    }
+    response.status(501).render("account", {
+      user: request.session.user,
+      modifiedUser: request.session.user,
+      title: "My Account",
+      error: "Unable to update the account."
+    });
   }
 });
 

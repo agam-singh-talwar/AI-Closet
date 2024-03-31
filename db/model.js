@@ -40,9 +40,10 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
-  location: {
-    type: String,
-  },
+  location: [{
+    latitude: String,
+    longitude: String
+  }],
   createdAt: {
     type: Date,
     default: Date.now,

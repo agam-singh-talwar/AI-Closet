@@ -1,4 +1,7 @@
 <div id="my-account" class="section">
+    {{#if message}}
+        <div id="message" class="alert alert-success" role="alert">{{message}}</div>
+    {{/if}}
     {{#if error}}
         <div id="error" class="alert alert-danger" role="alert">{{error}}</div>
     {{/if}}
@@ -15,15 +18,19 @@
         <div class="d-flex flex-row">
             <input type="text" class="form-control" name="location" placeholder="Location" 
             style="width: 250px; border-top-right-radius: 0; border-bottom-right-radius: 0;" 
-            value="{{location}}" autocomplete="off">
+            value="{{location}}" autocomplete="off" readonly>
+
+            <!-- Info to store in DB -->
+            <input type="hidden" name="lat" id="latitude" value="{{modifiedUser.latitude}}">
+            <input type="hidden" name="lon" id="latitude" value="{{modifiedUser.longitude}}">
 
             <button type="button" class="btn btn-outline-dark" style="width: 100px; border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: none;" 
             id="detectLocation">Detect</button>
         </div>
         <br>
-        <input type="password" class="form-control" name="new-password" placeholder="New Password">
+        <input type="password" class="form-control" name="newPass" placeholder="New Password">
         <br>
-        <input type="password" class="form-control" name="password" placeholder="Current Password" required>
+        <input type="password" class="form-control" name="currentPass" placeholder="Current Password" required>
         <br><br>
         <button type="submit" class="btn btn-dark">Update Account</button>
     </form>

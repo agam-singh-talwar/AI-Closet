@@ -159,15 +159,24 @@ li:hover {
 }
 
 #getin #error,
-#my-account #error {
+#my-account #error,
+#my-account #message {
     width: min(350px, 90%);
     height: 40px;
     padding: 0 13px;
-    background-color: rgba(255, 105, 105, 0.8);
     border: none;
 
     display: flex;
     align-items: center;
+}
+
+#getin #error,
+#my-account #error {
+    background-color: rgba(255, 105, 105, 0.8);
+}
+
+#my-account #message {
+    background-color: rgba(0, 255, 234, 0.35);
 }
 
 #getin input,
