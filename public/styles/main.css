@@ -140,7 +140,8 @@ li:hover {
 
 /* Pages for Authenticated Users */
 #my-account,
-#home {
+#home,
+#wardrobe {
     color: #000;
     background-color: rgb(214, 255, 252);
 }
@@ -188,7 +189,9 @@ li:hover {
 }
 
 #home #error,
-#home #message {
+#home #message,
+#wardrobe #error,
+#wardrobe #message {
     width: 100%;
 }
 
@@ -228,14 +231,14 @@ li:hover {
     font-weight: 700;
 }
 
-/* Home Page */
-#home {
+/* Home/Wardrobe Page */
+#home,
+#wardrobe {
     display: flex;
     align-items: start;
     justify-content: space-between;
     padding: 50px;
     padding-top: 120px;
-
 }
 
 #controls {
@@ -276,6 +279,10 @@ li:hover {
     border: 1px solid rgb(0, 255, 234);
     color: black;
     font-weight: 470;
+}
+
+#wardrobe .card-text {
+    margin: 0 !important;
 }
 
 /* Footer */

@@ -41,7 +41,7 @@
     </div>
 </div>
 
-<div id="home" class="section">
+<div id="wardrobe" class="section">
 
     <div style="width: 100%;">
         {{#if message}}
@@ -51,16 +51,38 @@
             <div id="error" class="alert alert-danger" role="alert">{{error}}</div>
         {{/if}}
 
-        <h3>Add more clothes to get outfit suggestions.</h3>
+        <h3>My Clothes</h3>
         <br>
+        {{#if clauset}}
+        <div id="all-clothes" class="d-flex flex-row flex-wrap">
+            {{#each clauset}}
+            <div class="card" style="width: 15rem; margin: 0 20px 20px 0;">
+                    <img class="card-img-top" src="/img/img-placeholder.jpg" alt="Cloth Image">
+                    <div class="card-body">
+                        <h5 class="card-title">{{name}}</h5>
+                        <p class="card-text"><strong>Color:</strong> {{color}}</p>
+                        <p class="card-text"><strong>Type:</strong> {{type}}</p>
+                        <p class="card-text"><strong>Occasion:</strong> {{occasion}}</p>
+                        <p class="card-text"><strong>Temperature:</strong> {{temperature}}°C</p>
+                        <br>
+                        <div style="width: 100%;" class="d-flex justify-content-between">
+                            <a href="/editcloth/{{_id}}" class="card-link" 
+                                style="color: black; text-decoration: underline; text-underline-offset: 3px;">Edit</a>
+                            <a href="/deletecloth/{{_id}}" class="card-link" 
+                                style="color: black; text-decoration: underline; text-underline-offset: 3px;">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            {{/each}}
+        </div>
+        {{else}}
+            <p>No clothes were added.</p>
+        {{/if}}
     </div>
 
-    <div id="controls">
-        <button id="generate-outfits" class="btn btn-outline-dark">Re-Generate Outfits</button>
-        <button type="button" id="add-cloth-btn" 
-            data-bs-toggle="modal" data-bs-target="#addClothModal">
-            <h1 id="add-cloth">+</h1>
+    <div id="controls" class="d-flex justify-content-center">
+        <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#addClothModal">
+            Add New Cloth
         </button>
-
     </div>
 </div>

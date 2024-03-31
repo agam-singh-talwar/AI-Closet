@@ -249,15 +249,47 @@ app.post("/account", ifAuthenticated, async (request, response) => {
   }
 });
 
+app.get("/wardrobe", ifAuthenticated, async (request, response) => {
 
-app.get("/wardrobe", ifAuthenticated, (request, response) => {
-  // render virtual wardrobe page
+  const { success, error } = request.query;
+
+  try {
+    const user = await User.findOne({ email: request.session.user.email }).lean();
+    if (user) {
+      request.session.user.clauset = user.clauset;
+
+      if (success) {
+        response.status(201).render("wardrobe", {
+          user: request.session.user,
+          title: "My Wardrobe",
+          clauset: request.session.user.clauset,
+          message: "Cloth added successfully."
+        });
+      } else if (error) {
+        response.status(500).render("wardrobe", {
+          user: request.session.user,
+          title: "My Wardrobe",
+          clauset: request.session.user.clauset,
+          error: "Ooops something is wrong."
+        });
+      } else {
+        response.status(200).render("wardrobe", {
+          user: request.session.user,
+          title: "My Wardrobe",
+          clauset: request.session.user.clauset
+        });
+      }
+    }
+  } catch (error) {
+    response.status(500).render("wardrobe", {
+      title: "My Wardrobe",
+      error: "Ooops something is wrong."
+    });
+  }
 });
 
-// CRUD operations for cloth routes
-
 // Create a new cloth for a user
-app.post("/addcloth", async (request, response) => {
+app.post("/addcloth", ifAuthenticated, async (request, response) => {
   const { name, color, type, occasion, temperature } = request.body;
   try {
     const user = await User.findOne({ email: request.session.user.email });
@@ -279,23 +311,13 @@ app.post("/addcloth", async (request, response) => {
         { email: request.session.user.email },
         { $set: { "clauset": request.session.user.clauset } }
       ).then(() => {
-        response.status(201).render("home", {
-          title: "Home",
-          message: "Cloth was added."
-        });
+        response.status(201).redirect("/wardrobe?success=true");
       });
     } else {
-      response.status(401).render("home", {
-        title: "Home",
-        error: "Ooops something is wrong."
-      });
+      response.status(401).redirect("/wardrobe?error=true");
     }
   } catch (error) {
-    console.error(error);
-    response.status(500).render("home", {
-      title: "Home",
-      error: "Ooops something is wrong."
-    });
+    response.status(500).redirect("/wardrobe?error=true");
   }
 });
 
