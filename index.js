@@ -58,14 +58,11 @@ app.get("/", async (request, response) => {
     title: "AI Clauset"
   });
 });
-// /testing route
-// app.get("/test",async(req,res)=>{
-//     //
-//     const user = new User({"name": "agam" , "email": "agam@agam.com", "password":"password"});
-//      const u = await user.save();
-//     const u = await User.find({"name":"agam"});
-//     res.status(201).send(u)
-// })
+
+app.post("/", ifAuthenticated, (request, response) => {
+  // re-render home page with new outfits
+});
+
 app.get("/login", ifNotAuthenticated, (request, response) => {
   response.status(200).render("login", { title: "Login" });
 });
@@ -135,15 +132,6 @@ app.post("/signup", ifNotAuthenticated, async (request, response) => {
       error: "Ooops something is wrong."
     });
   }
-});
-
-
-app.get("/home", ifAuthenticated, (request, response) => {
-  // render (user) home page
-});
-
-app.put("/home", ifAuthenticated, (request, response) => {
-  // update outfits on the (user) home page
 });
 
 const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY;
