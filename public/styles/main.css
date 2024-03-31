@@ -14,6 +14,10 @@ html {
     font-size: 17px;
 }
 
+*:focus {
+    outline: none;
+}
+
 a {
     text-decoration: none;
     color: #fff;
@@ -25,7 +29,7 @@ a {
     font-weight: 400;
 }
 
-#navbar {
+.navbar {
     position: absolute;
     top: 0;
     width: 100%;
@@ -33,6 +37,10 @@ a {
     background-color: transparent;
     display: flex;
     align-items: center;
+}
+
+#authNavbar {
+    background-color: rgb(40, 42, 40);
 }
 
 #authNavLinks > * {
@@ -117,11 +125,23 @@ li:hover {
     align-items: center;
 }
 
-/* 404 page, Login/Signup Page */
+/* All Pages General Settings */
+#not-found,
+#getin,
+#my-account {
+    margin-bottom: -25.5px;
+}
+
+/* Pages for Non Authenticated Users */
 #not-found,
 #getin {
     background-color: rgb(40, 42, 40);
-    margin-bottom: -25.5px;
+}
+
+/* Pages for Authenticated Users */
+#my-account {
+    color: #000;
+    background-color: rgb(214, 255, 252);
 }
 
 #getin h1 {
@@ -129,7 +149,8 @@ li:hover {
     font-weight: 750;
 }
 
-#getin form {
+#getin form,
+#my-account form {
     margin: 0 50px;
     width: 100%;
     display: flex;
@@ -137,8 +158,9 @@ li:hover {
     align-items: center;
 }
 
-#getin #error {
-    width: min(300px, 90%);
+#getin #error,
+#my-account #error {
+    width: min(350px, 90%);
     height: 40px;
     padding: 0 13px;
     background-color: rgba(255, 105, 105, 0.8);
@@ -150,14 +172,32 @@ li:hover {
 
 #getin input,
 #getin button {
-    width: min(300px, 90%);
-    border: 3px solid rgb(255, 255, 255);
     transition: all 0.5s;
+    border: 3px solid rgb(255, 255, 255);
+}
+
+#getin input,
+#getin button,
+#my-account input,
+#my-account button {
+    width: min(350px, 90%);
+}
+
+#my-account input {
+    background-color: rgb(214, 255, 252);
+    border: 1px solid rgb(40, 42, 40);
 }
 
 #getin input:active,
 #getin input:focus {
     border: 3px solid rgb(0, 255, 234);
+}
+
+#my-account input:active,
+#my-account input:focus {
+    border: 3px solid rgb(40, 42, 40);
+    outline-width: 0;
+    box-shadow: 0 0 0 rgb(255, 255, 255);
 }
 
 #getin button:hover {

@@ -44,6 +44,13 @@ const ifNotAuthenticated = (request, response, next) => {
     next();
 }
 
+const ifAuthenticated = (request, response, next) => {
+  if (!request.session.user)
+    response.redirect("/login");
+  else
+    next();
+}
+
 //app routes
 app.get("/", async (request, response) => {
   response.status(200).render("index", {
@@ -69,7 +76,7 @@ app.post("/login", ifNotAuthenticated, async (request, response) => {
     const user = await User.findOne({ email: request.body.email });
 
     if (!user) {
-      response.status(401).render("login", { 
+      response.status(401).render("login", {
         title: "Login",
         error: "No account found."
       });
@@ -80,13 +87,14 @@ app.post("/login", ifNotAuthenticated, async (request, response) => {
       );
 
       if (isPasswordMatch) {
-        request.session.user = { name: user.name };
-        response.status(200).render("index", { 
+        console.log(user);
+        request.session.user = { name: user.name, email: user.email, location: user.location };
+        response.status(200).render("index", {
           title: "Home",
-          user: request.session.user 
+          user: request.session.user
         });
       } else {
-        response.status(401).render("login", { 
+        response.status(401).render("login", {
           title: "Login",
           error: "Incorrect credentials."
         });
@@ -94,7 +102,7 @@ app.post("/login", ifNotAuthenticated, async (request, response) => {
     }
   } catch (err) {
     console.log(err);
-    response.status(500).render("login", { 
+    response.status(500).render("login", {
       title: "Login",
       error: "Ooops something is wrong."
     });
@@ -116,56 +124,95 @@ app.post("/signup", ifNotAuthenticated, async (request, response) => {
     });
     await user.save();
 
-    request.session.user = { name: user.name };
-    response.status(201).render("index", { 
+    request.session.user = { name: user.name, email: user.email, location: user.location };
+    response.status(201).render("index", {
       title: "Home",
-      user: request.session.user 
+      user: request.session.user
     });
   } catch (err) {
     console.log(err);
-    response.status(501).render("signup", { 
+    response.status(501).render("signup", {
       title: "Sign Up",
       error: "Ooops something is wrong."
     });
   }
 });
 
-// the next several of routes require middleware to not allow outside access
 
-// app.get("/home", checkAuthorization, (request, response) => {
-//     // render (user) home page
-// });
+app.get("/home", ifAuthenticated, (request, response) => {
+  // render (user) home page
+});
 
-// app.put("/home", checkAuthorization, (request, response) => {
-//     // update outfits on the (user) home page
-// });
+app.put("/home", ifAuthenticated, (request, response) => {
+  // update outfits on the (user) home page
+});
 
-// app.get("/account", checkAuthorization, (request, response) => {
-//     // render account page
-// });
+const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY;
+app.get("/account", ifAuthenticated, async (request, response) => {
 
-// app.put("/account", checkAuthorization, async (request, response) => {
-//   // update account
-//   const id = request.params;
-//   const { nam, eml, loc } = request.body;
-//   try {
-//     const usr = await User.findOneAndUpdate(
-//       { _id: id },
-//       { name: nam, eml: email, locaiton: loc }
-//     );
-//     if (usr != null) {
-//       response.status(201).send(usr);
-//     }
-//   } catch (err) {
-//     if (usr == null) {
-//       response.status(501).send("Unable to update the account!");
-//     }
-//   }
-// });
+  // detect location from latitute and longitude
+  if (request.query.lat && request.query.lon) {
+    const latitude = request.query.lat;
+    const longitude = request.query.lon;
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${OPENWEATHER_API_KEY}`;
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
 
-// app.get("/wardrobe", checkAuthorization, (request, response) => {
-//     // render virtual wardrobe page
-// });
+      let modifiedUser = { ...request.session.user};  // clone without link
+      modifiedUser.name = request.query.name;
+      modifiedUser.email = request.query.email;
+      modifiedUser.latitude = latitude;
+      modifiedUser.longitude = longitude;
+
+      response.status(200).render("account", {
+        user: request.session.user,
+        modifiedUser: modifiedUser,
+        title: "My Account",
+        location: data.name + ', ' + data.sys.country
+      });
+    } catch (err) {
+      console.log(err);
+      response.status(500).render("account", {
+        user: request.session.user,
+        modifiedUser: request.session.user,
+        title: "My Account",
+        error: "Couldn't detect location."
+      });
+    }
+  }
+  else
+    response.status(200).render("account", {
+      user: request.session.user,
+      modifiedUser: request.session.user,
+      title: "My Account"
+    });
+});
+
+
+app.put("/account", ifAuthenticated, async (request, response) => {
+  // update account
+  const id = request.params;
+  const { nam, eml, loc } = request.body;
+  try {
+    const usr = await User.findOneAndUpdate(
+      { _id: id },
+      { name: nam, eml: email, locaiton: loc }
+    );
+    if (usr != null) {
+      response.status(201).send(usr);
+    }
+  } catch (err) {
+    if (usr == null) {
+      response.status(501).send("Unable to update the account!");
+    }
+  }
+});
+
+
+app.get("/wardrobe", ifAuthenticated, (request, response) => {
+  // render virtual wardrobe page
+});
 
 // CRUD operations for cloth routes
 
