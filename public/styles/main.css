@@ -43,11 +43,11 @@ a {
     background-color: rgb(40, 42, 40);
 }
 
-#authNavLinks > * {
+#authNavLinks>* {
     padding-left: 30px;
 }
 
-#authNavLinks > *:hover {
+#authNavLinks>*:hover {
     text-decoration: underline;
     text-underline-offset: 5px;
 }
@@ -111,7 +111,7 @@ li {
 
 li:hover {
     background-color: rgb(255, 255, 255);
-    color:rgb(40, 42, 40);
+    color: rgb(40, 42, 40);
 }
 
 .circle {
@@ -139,7 +139,8 @@ li:hover {
 }
 
 /* Pages for Authenticated Users */
-#my-account {
+#my-account,
+#home {
     color: #000;
     background-color: rgb(214, 255, 252);
 }
@@ -158,10 +159,12 @@ li:hover {
     align-items: center;
 }
 
-#getin #error,
-#my-account #error,
-#my-account #message {
-    width: min(350px, 90%);
+.modal {
+    color: black;
+}
+
+#error,
+#message {
     height: 40px;
     padding: 0 13px;
     border: none;
@@ -170,13 +173,23 @@ li:hover {
     align-items: center;
 }
 
-#getin #error,
-#my-account #error {
+#error {
     background-color: rgba(255, 105, 105, 0.8);
 }
 
-#my-account #message {
+#message {
     background-color: rgba(0, 255, 234, 0.35);
+}
+
+#getin #error,
+#my-account #error,
+#my-account #message {
+    width: min(350px, 90%);
+}
+
+#home #error,
+#home #message {
+    width: 100%;
 }
 
 #getin input,
@@ -213,6 +226,56 @@ li:hover {
     border: 3px solid rgb(0, 255, 234);
     background-color: rgb(0, 255, 234);
     font-weight: 700;
+}
+
+/* Home Page */
+#home {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    padding: 50px;
+    padding-top: 120px;
+
+}
+
+#controls {
+    width: 100%;
+    position: relative;
+    
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#add-cloth-btn {
+    border: none;
+    padding: 0;
+    margin: 0;
+    background-color: transparent;
+}
+
+#add-cloth {
+    width: 75px;
+    height: 75px;
+    border-radius: 100%;
+    background-color: rgb(0, 255, 234);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#generate-outfits {
+    font-size: 20px;
+    transition: all 0.5s;
+}
+
+#generate-outfits:hover {
+    background-color: rgb(0, 255, 234);
+    border: 1px solid rgb(0, 255, 234);
+    color: black;
+    font-weight: 470;
 }
 
 /* Footer */

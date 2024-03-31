@@ -1,0 +1,63 @@
+<!-- Modal to Add New Cloth -->
+<div class="modal fade" id="addClothModal" tabindex="-1" aria-labelledby="addClothModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="addClothModalLabel">Add New Cloth</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form name="addCloth" method="post" action="/addcloth">
+                <div class="modal-body" id="modal">
+                    <input type="text" class="form-control" name="name" placeholder="Cloth Name" autocomplete="off" required>
+                    <br>
+                    <input type="text" class="form-control" name="color" placeholder="Color" required>
+                    <br>
+                    <select class="form-select" name="type" required>
+                        <option value="" selected disabled>Type</option>
+                        <option value="Top">Top</option>
+                        <option value="Bottom">Bottom</option>
+                        <option value="Footwear">Footwear</option>
+                        <option value="Accessories">Accessories</option>
+                    </select>
+                    <br>
+                    <select class="form-select" name="occasion" required>
+                        <option value="" selected disabled>Occasion</option>
+                        <option value="Casual">Casual</option>
+                        <option value="Formal">Formal</option>
+                        <option value="Party">Party</option>
+                        <option value="Sports">Sports</option>
+                    </select>
+                    <br>
+                    <input type="number" class="form-control" name="temperature" placeholder="Temperature to Wear (C)" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-dark">Add Cloth</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="home" class="section">
+
+    <div style="width: 100%;">
+        {{#if message}}
+            <div id="message" class="alert alert-success" role="alert">{{message}}</div>
+        {{/if}}
+        {{#if error}}
+            <div id="error" class="alert alert-danger" role="alert">{{error}}</div>
+        {{/if}}
+
+        <h3>Add more clothes to get outfit suggestions.</h3>
+    </div>
+
+    <div id="controls">
+        <button id="generate-outfits" class="btn btn-outline-dark">Re-Generate Outfits</button>
+        <button type="button" id="add-cloth-btn" 
+            data-bs-toggle="modal" data-bs-target="#addClothModal">
+            <h1 id="add-cloth">+</h1>
+        </button>
+
+    </div>
+</div>

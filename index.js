@@ -53,10 +53,17 @@ const ifAuthenticated = (request, response, next) => {
 
 //app routes
 app.get("/", async (request, response) => {
-  response.status(200).render("index", {
-    user: request.session.user,
-    title: "AI Clauset"
-  });
+
+  if (request.session.user)
+    response.status(200).render("home", {
+      user: request.session.user,
+      title: "Home"
+    });
+  else
+    response.status(200).render("index", {
+      user: request.session.user,
+      title: "AI Clauset"
+    });
 });
 
 app.post("/", ifAuthenticated, (request, response) => {
@@ -84,11 +91,16 @@ app.post("/login", ifNotAuthenticated, async (request, response) => {
       );
 
       if (isPasswordMatch) {
-        request.session.user = { name: user.name, email: user.email, latitude: user.latitude, longitude: user.longitude };
-        response.status(200).render("index", {
-          title: "Home",
-          user: request.session.user
-        });
+        request.session.user = {
+          name: user.name,
+          email: user.email,
+          latitude: user.latitude,
+          longitude: user.longitude,
+          clauset: user.clauset
+        };
+        if (request.session.user.clauset == undefined)
+          request.session.user.clauset = [];
+        response.status(200).redirect("/");
       } else {
         response.status(401).render("login", {
           title: "Login",
@@ -120,11 +132,14 @@ app.post("/signup", ifNotAuthenticated, async (request, response) => {
     });
     await user.save();
 
-    request.session.user = { name: user.name, email: user.email, latitude: user.latitude, longitude: user.longitude };
-    response.status(201).render("index", {
-      title: "Home",
-      user: request.session.user
-    });
+    request.session.user = {
+      name: user.name,
+      email: user.email,
+      latitude: user.latitude,
+      longitude: user.longitude,
+      clauset: []
+    };
+    response.status(201).redirect("/");
   } catch (err) {
     console.log(err);
     response.status(501).render("signup", {
@@ -146,7 +161,7 @@ app.get("/account", ifAuthenticated, async (request, response) => {
       const res = await fetch(url);
       const data = await res.json();
 
-      let modifiedUser = { ...request.session.user };  // clone without link
+      let modifiedUser = { ...request.session.user };  // clone original without link
       modifiedUser.name = request.query.name;
       modifiedUser.email = request.query.email;
       modifiedUser.latitude = latitude;
@@ -198,7 +213,17 @@ app.post("/account", ifAuthenticated, async (request, response) => {
           { email: request.session.user.email },
           { $set: { "name": name, "email": email, "password": hashedpass, "location": [{ "latitude": lat, "longitude": lon }] } }
         ).then(() => {
-          request.session.user = { name: name, email: email, latitude: lat, longitude: lon };
+
+          request.session.user = {
+            name: user.name,
+            email: user.email,
+            latitude: lat,
+            longitude: lon,
+            clauset: user.clauset
+          };
+          if (request.session.user.clauset == undefined)
+            request.session.user.clauset = [];
+
           response.status(200).render("account", {
             title: "My Account",
             user: request.session.user,
@@ -232,31 +257,45 @@ app.get("/wardrobe", ifAuthenticated, (request, response) => {
 // CRUD operations for cloth routes
 
 // Create a new cloth for a user
-app.post("/users/:userId/cloths", async (req, res) => {
-  const { userId } = req.params;
-  const { name, color, type, occasion, temperature } = req.body;
+app.post("/addcloth", async (request, response) => {
+  const { name, color, type, occasion, temperature } = request.body;
   try {
-    // Find the user by ID
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).send("User not found");
+    const user = await User.findOne({ email: request.session.user.email });
+    if (user) {
+      // Create a new cloth object
+      const cloth = {
+        name,
+        color,
+        type,
+        occasion,
+        temperature,
+      };
+
+      // Add the cloth object to the session user's cloths array
+      request.session.user.clauset.push(cloth);
+
+      // Update DB
+      User.updateOne(
+        { email: request.session.user.email },
+        { $set: { "clauset": request.session.user.clauset } }
+      ).then(() => {
+        response.status(201).render("home", {
+          title: "Home",
+          message: "Cloth was added."
+        });
+      });
+    } else {
+      response.status(401).render("home", {
+        title: "Home",
+        error: "Ooops something is wrong."
+      });
     }
-    // Create a new cloth object
-    const cloth = {
-      name,
-      color,
-      type,
-      occasion,
-      temperature,
-    };
-    // Add the new cloth to the user's cloth array
-    user.clauset.push(cloth);
-    // Save the updated user object
-    await user.save();
-    res.status(201).send(user);
   } catch (error) {
     console.error(error);
-    res.status(500).send("Server Error");
+    response.status(500).render("home", {
+      title: "Home",
+      error: "Ooops something is wrong."
+    });
   }
 });
 
