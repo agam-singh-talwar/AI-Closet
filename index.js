@@ -288,7 +288,6 @@ app.get("/wardrobe", ifAuthenticated, async (request, response) => {
   }
 });
 
-// Create a new cloth for a user
 app.post("/addcloth", ifAuthenticated, async (request, response) => {
   const { name, color, type, occasion, temperature } = request.body;
   try {
@@ -321,24 +320,7 @@ app.post("/addcloth", ifAuthenticated, async (request, response) => {
   }
 });
 
-// Read all cloths of a user
-app.get("/users/:userId/cloths", async (req, res) => {
-  const { userId } = req.params;
-  try {
-    // Find the user by ID and return the cloths array
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
-    res.status(200).send(user.clauset);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Server Error");
-  }
-});
-
-// Update a cloth of a user
-app.put("/users/:userId/cloths/:clothId", async (req, res) => {
+app.post("/cloth/edit/:id", async (req, res) => {
   const { userId, clothId } = req.params;
   const { name, color, type, occasion, temperature } = req.body;
   try {
@@ -369,23 +351,23 @@ app.put("/users/:userId/cloths/:clothId", async (req, res) => {
   }
 });
 
-// Delete a cloth of a user
-app.delete("/users/:userId/cloths/:clothId", async (req, res) => {
-  const { userId, clothId } = req.params;
+app.post("/cloth/delete/:id", ifAuthenticated, async (request, response) => {
+  const { id } = request.params;
+
   try {
-    // Find the user by ID
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).send("User not found");
+    const user = await User.findOne({ email: request.session.user.email });
+    if (user) {
+
+      User.updateOne({ email: request.session.user.email }, { $pull: { clauset: { _id: id } } }).then(() => {
+        request.session.user.clauset = user.clauset;
+        response.status(201).redirect("/wardrobe");
+      });
+      
+    } else {
+      response.status(404).redirect("/wardrobe?error=true");
     }
-    // Remove the cloth by ID
-    user.clauset.id(clothId).remove();
-    // Save the updated user object
-    await user.save();
-    res.status(200).send(user);
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Server Error");
+    response.status(500).redirect("/wardrobe?error=true");
   }
 });
 

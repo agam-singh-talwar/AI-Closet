@@ -65,11 +65,13 @@
                         <p class="card-text"><strong>Occasion:</strong> {{occasion}}</p>
                         <p class="card-text"><strong>Temperature:</strong> {{temperature}}°C</p>
                         <br>
-                        <div style="width: 100%;" class="d-flex justify-content-between">
-                            <a href="/editcloth/{{_id}}" class="card-link" 
-                                style="color: black; text-decoration: underline; text-underline-offset: 3px;">Edit</a>
-                            <a href="/deletecloth/{{_id}}" class="card-link" 
-                                style="color: black; text-decoration: underline; text-underline-offset: 3px;">Delete</a>
+                        <div style="width: 100%;" class="d-flex justify-content-between" id="card-btns">
+                            <form name="editcloth" method="post" action="/cloth/edit/{{_id}}">
+                                <button type="submit" class="card-link">Edit</button>
+                            </form>
+                            <form name="deletecloth" method="post" action="/cloth/delete/{{_id}}">
+                                <button type="submit" class="card-link">Delete</button>
+                            </form>
                         </div>
                     </div>
                 </div>

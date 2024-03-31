@@ -244,7 +244,7 @@ li:hover {
 #controls {
     width: 100%;
     position: relative;
-    
+
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -283,6 +283,14 @@ li:hover {
 
 #wardrobe .card-text {
     margin: 0 !important;
+}
+
+#wardrobe #card-btns button {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    border: none;
+    background-color: transparent;
+    padding: 0;
 }
 
 /* Footer */
