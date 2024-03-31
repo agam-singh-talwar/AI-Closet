@@ -257,7 +257,7 @@ app.post("/account", ifAuthenticated, async (request, response) => {
           user: request.session.user,
           modifiedUser: request.session.user,
           title: "My Account",
-          message: "Incorrect password."
+          error: "Incorrect password."
         });
       }
     }
