@@ -6,10 +6,10 @@ const mongoose = require("mongoose");
 const path = require("path");
 require("dotenv").config();
 
-// import db connection object
+// database setup
 const db = require("./db/index");
-// get the User Schema
 const User = require("./db/model");
+
 //set up application
 const PORT = process.env.PORT || 8080;
 const app = express();
@@ -30,8 +30,6 @@ app.use((request, response, next) => {
   next();
 });
 
-
-
 app.engine("hbs", hbs.engine({
   extname: "hbs",
   defaultLayout: 'main',
@@ -44,6 +42,7 @@ app.engine("hbs", hbs.engine({
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, './views'));
 
+// checks for user authentication
 const ifNotAuthenticated = (request, response, next) => {
   if (request.session.user)
     response.redirect("/");
@@ -58,14 +57,23 @@ const ifAuthenticated = (request, response, next) => {
     next();
 }
 
+app.listen(PORT, () => {
+  console.log(`Listening on port ${PORT}`);
+});
+
 //app routes
+
+// home page
 app.get("/", async (request, response) => {
 
+  //renders home page with user if logged in
   if (request.session.user)
     response.status(200).render("home", {
       user: request.session.user,
       title: "Home"
     });
+
+  // renders landing page if not logged in
   else
     response.status(200).render("index", {
       user: request.session.user,
@@ -73,14 +81,17 @@ app.get("/", async (request, response) => {
     });
 });
 
+// need to implement with AI
 app.post("/", ifAuthenticated, (request, response) => {
   // re-render home page with new outfits
 });
 
+// login page
 app.get("/login", ifNotAuthenticated, (request, response) => {
   response.status(200).render("login", { title: "Login" });
 });
 
+// post request to login
 app.post("/login", ifNotAuthenticated, async (request, response) => {
   try {
     const hashedPassword = await hashPassword(request.body.password);
@@ -124,10 +135,12 @@ app.post("/login", ifNotAuthenticated, async (request, response) => {
   }
 });
 
+// signup page
 app.get("/signup", ifNotAuthenticated, (request, response) => {
   response.status(200).render("signup", { title: "Sign Up" });
 });
 
+// post request to create account
 app.post("/signup", ifNotAuthenticated, async (request, response) => {
   try {
     const hashedpass = await hashPassword(request.body.password);
@@ -156,6 +169,7 @@ app.post("/signup", ifNotAuthenticated, async (request, response) => {
   }
 });
 
+// account settings page
 const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY;
 app.get("/account", ifAuthenticated, async (request, response) => {
 
@@ -198,6 +212,7 @@ app.get("/account", ifAuthenticated, async (request, response) => {
     });
 });
 
+// update account information request
 app.post("/account", ifAuthenticated, async (request, response) => {
   const { name, email, lat, lon, newPass, currentPass } = request.body;
   try {
@@ -256,11 +271,13 @@ app.post("/account", ifAuthenticated, async (request, response) => {
   }
 });
 
+// view all cloths in the virtual wardrobe
 app.get("/wardrobe", ifAuthenticated, async (request, response) => {
   const { success, updated, deleted, error } = request.query;
 
   try {
     const user = await User.findOne({ email: request.session.user.email }).lean();
+
     if (user) {
       request.session.user.clauset = user.clauset;
 
@@ -278,7 +295,7 @@ app.get("/wardrobe", ifAuthenticated, async (request, response) => {
           clauset: request.session.user.clauset,
           message: "Cloth updated successfully."
         });
-      }else if (deleted) {
+      } else if (deleted) {
         response.status(200).render("wardrobe", {
           user: request.session.user,
           title: "My Wardrobe",
@@ -309,92 +326,75 @@ app.get("/wardrobe", ifAuthenticated, async (request, response) => {
   }
 });
 
+// add cloth to the virtual wardrobe
 app.post("/cloth/add", ifAuthenticated, async (request, response) => {
   const { name, color, type, occasion, temperature } = request.body;
   try {
-    const user = await User.findOne({ email: request.session.user.email });
-    if (user) {
-      // Create a new cloth object
-      const cloth = {
-        name,
-        color,
-        type,
-        occasion,
-        temperature,
-      };
+    // Create a new cloth object
+    const cloth = {
+      name,
+      color,
+      type,
+      occasion,
+      temperature,
+    };
 
-      // Add the cloth object to the session user's cloths array
-      request.session.user.clauset.push(cloth);
+    // Add the cloth object to the session user's cloths array
+    request.session.user.clauset.push(cloth);
 
-      // Update DB
-      User.updateOne(
-        { email: request.session.user.email },
-        { $set: { "clauset": request.session.user.clauset } }
-      ).then(() => {
-        response.status(201).redirect("/wardrobe?success=true");
-      });
-    } else {
-      response.status(401).redirect("/wardrobe?error=true");
-    }
+    // Update DB
+    User.updateOne(
+      { email: request.session.user.email },
+      { $set: { "clauset": request.session.user.clauset } }
+    ).then(() => {
+      response.status(201).redirect("/wardrobe?success=true");
+    });
   } catch (error) {
     response.status(500).redirect("/wardrobe?error=true");
   }
 });
 
+// edit cloth in the virtual wardrobe
 app.post("/cloth/edit/:id", ifAuthenticated, async (request, response) => {
   const { id } = request.params;
   const { name, color, type, occasion, temperature } = request.body;
   try {
-    const user = await User.findOne({ email: request.session.user.email });
-    if (user) {
-
-      User.updateOne({ email: request.session.user.email, "clauset._id": id }, {
-        $set: {
-          "clauset.$.name": name,
-          "clauset.$.color": color,
-          "clauset.$.type": type,
-          "clauset.$.occasion": occasion,
-          "clauset.$.temperature": temperature
-        }
-      }).then(() => {
-        response.status(200).redirect("/wardrobe?updated=true");
-      });
-    } else {
-      response.status(404).redirect("/wardrobe?error=true");
-    }
+    User.updateOne({ email: request.session.user.email, "clauset._id": id }, {
+      $set: {
+        "clauset.$.name": name,
+        "clauset.$.color": color,
+        "clauset.$.type": type,
+        "clauset.$.occasion": occasion,
+        "clauset.$.temperature": temperature
+      }
+    }).then(() => {
+      response.status(200).redirect("/wardrobe?updated=true");
+    });
   } catch (error) {
     response.status(500).redirect("/wardrobe?error=true");
   }
 });
 
+// delete cloth from the virtual wardrobe
 app.post("/cloth/delete/:id", ifAuthenticated, async (request, response) => {
   const { id } = request.params;
 
   try {
-    const user = await User.findOne({ email: request.session.user.email });
-    if (user) {
-
-      User.updateOne({ email: request.session.user.email }, { $pull: { clauset: { _id: id } } }).then(() => {
-        response.status(201).redirect("/wardrobe?deleted=true");
-      });
-
-    } else {
-      response.status(404).redirect("/wardrobe?error=true");
-    }
+    User.updateOne({ email: request.session.user.email }, { $pull: { clauset: { _id: id } } }).then(() => {
+      response.status(201).redirect("/wardrobe?deleted=true");
+    });
   } catch (error) {
     response.status(500).redirect("/wardrobe?error=true");
   }
 });
 
+// logout out of the session
 app.get("/logout", (request, response) => {
   request.session.reset();
   response.redirect('/');
 });
 
+// invalid route
 app.get("/*", (request, response) => {
   response.status(404).render("page404", { title: "Not Found" });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
 });

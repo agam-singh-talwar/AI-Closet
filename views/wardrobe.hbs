@@ -57,69 +57,69 @@
         <div id="all-clothes" class="d-flex flex-row flex-wrap">
             {{#each clauset}}
             <div class="card" style="width: 15rem; margin: 0 20px 20px 0;">
-                    <img class="card-img-top" src="/img/img-placeholder.jpg" alt="Cloth Image">
-                    <div class="card-body">
-                        <h5 class="card-title">{{name}}</h5>
-                        <p class="card-text"><strong>Color:</strong> {{color}}</p>
-                        <p class="card-text"><strong>Type:</strong> {{type}}</p>
-                        <p class="card-text"><strong>Occasion:</strong> {{occasion}}</p>
-                        <p class="card-text"><strong>Temperature:</strong> {{temperature}}°C</p>
-                        <br>
-                        <div style="width: 100%;" class="d-flex justify-content-between" id="card-btns">
-                            <button type="button" class="card-link" data-bs-toggle="modal" data-bs-target="#editClothModal{{_id}}">Edit</button>
-                            <form name="deletecloth" method="post" action="/cloth/delete/{{_id}}">
-                                <button type="submit" class="card-link">Delete</button>
-                            </form>
-                        </div>
+                <img class="card-img-top" src="/img/img-placeholder.jpg" alt="Cloth Image">
+                <div class="card-body">
+                    <h5 class="card-title">{{name}}</h5>
+                    <p class="card-text"><strong>Color:</strong> {{color}}</p>
+                    <p class="card-text"><strong>Type:</strong> {{type}}</p>
+                    <p class="card-text"><strong>Occasion:</strong> {{occasion}}</p>
+                    <p class="card-text"><strong>Temperature:</strong> {{temperature}}°C</p>
+                    <br>
+                    <div style="width: 100%;" class="d-flex justify-content-between" id="card-btns">
+                        <button type="button" class="card-link" data-bs-toggle="modal" data-bs-target="#editClothModal{{_id}}">Edit</button>
+                        <form name="deletecloth" method="post" action="/cloth/delete/{{_id}}">
+                            <button type="submit" class="card-link">Delete</button>
+                        </form>
                     </div>
                 </div>
+            </div>
 
-                <!-- Modal to Edit Cloth -->
-                <div class="modal fade" id="editClothModal{{_id}}" tabindex="-1" aria-labelledby="editClothModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="editClothModalLabel">Edit Cloth</h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <form name="editCloth" method="post" action="/cloth/edit/{{_id}}">
-                                <div class="modal-body" id="modal">
-                                    <input type="file" class="form-control" name="image" accept="image/*">
-                                    <br>
-                                    <input type="text" class="form-control" name="name" placeholder="Cloth Name" autocomplete="off" value="{{name}}" required>
-                                    <br>
-                                    <input type="text" class="form-control" name="color" placeholder="Color" value={{color}} required>
-                                    <br>
-                                    <select class="form-select" name="type" required>
-                                        {{#select type}}
-                                        <option value="" disabled>Type</option>
-                                        <option value="Top">Top</option>
-                                        <option value="Bottom">Bottom</option>
-                                        <option value="Footwear">Footwear</option>
-                                        <option value="Accessories">Accessories</option>
-                                        {{/select}}
-                                    </select>
-                                    <br>
-                                    <select class="form-select" name="occasion" required>
-                                        {{#select occasion}}
-                                        <option value="" disabled>Occasion</option>
-                                        <option value="Casual">Casual</option>
-                                        <option value="Formal">Formal</option>
-                                        <option value="Party">Party</option>
-                                        <option value="Sports">Sports</option>
-                                        {{/select}}
-                                    </select>
-                                    <br>
-                                    <input type="number" class="form-control" name="temperature" placeholder="Temperature to Wear (°C)" value="{{temperature}}" required>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-dark">Update</button>
-                                </div>
-                            </form>
+            <!-- Modal to Edit Cloth -->
+            <div class="modal fade" id="editClothModal{{_id}}" tabindex="-1" aria-labelledby="editClothModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="editClothModalLabel">Edit Cloth</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
+                        <form name="editCloth" method="post" action="/cloth/edit/{{_id}}">
+                            <div class="modal-body" id="modal">
+                                <input type="file" class="form-control" name="image" accept="image/*">
+                                <br>
+                                <input type="text" class="form-control" name="name" placeholder="Cloth Name" autocomplete="off" value="{{name}}" required>
+                                <br>
+                                <input type="text" class="form-control" name="color" placeholder="Color" value={{color}} required>
+                                <br>
+                                <select class="form-select" name="type" required>
+                                    {{#select type}}
+                                    <option value="" disabled>Type</option>
+                                    <option value="Top">Top</option>
+                                    <option value="Bottom">Bottom</option>
+                                    <option value="Footwear">Footwear</option>
+                                    <option value="Accessories">Accessories</option>
+                                    {{/select}}
+                                </select>
+                                <br>
+                                <select class="form-select" name="occasion" required>
+                                    {{#select occasion}}
+                                    <option value="" disabled>Occasion</option>
+                                    <option value="Casual">Casual</option>
+                                    <option value="Formal">Formal</option>
+                                    <option value="Party">Party</option>
+                                    <option value="Sports">Sports</option>
+                                    {{/select}}
+                                </select>
+                                <br>
+                                <input type="number" class="form-control" name="temperature" placeholder="Temperature to Wear (°C)" value="{{temperature}}" required>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-dark">Update</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
+            </div>
             {{/each}}
         </div>
         {{else}}
