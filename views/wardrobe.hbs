@@ -8,6 +8,8 @@
             </div>
 
             <script type="module">
+
+                // cloth image upload
                 import * as LR from 'https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.35.2/web/lr-file-uploader-regular.min.js';
                 LR.registerBlocks(LR);
 
@@ -18,9 +20,12 @@
 
                 function renderFiles(files) {
                     files.map(file => {
+
+                        // get url of uploaded file
                         var url = file.cdnUrl;
                         document.getElementsByClassName("image-upload")[0].value = url;
 
+                        // fetch AI prediction for top/bottom
                         fetch("https://clothrecog-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/7ef78a58-50bb-4e84-897d-f89dae45335d/classify/iterations/predict%20upper%20or%20lower/url", {
                             'method': 'POST',
                             'headers': {
@@ -31,6 +36,7 @@
                         })
                         .then(prediction => prediction.json())
                         .then(prediction => {
+                            // extract prediction data
                             console.log(prediction)
                             let lowerProbability = prediction.predictions.find(prediction => prediction.tagName === 'lower').probability;
                             let upperProbability = prediction.predictions.find(prediction => prediction.tagName === 'Upper').probability;
@@ -45,8 +51,8 @@
                         });
                     });
                 }
-
-
+                
+                // add cloth form validation
                 document.getElementById("add-cloth-form").addEventListener("click", function(e) {
                     e.preventDefault();
                     // image upload check

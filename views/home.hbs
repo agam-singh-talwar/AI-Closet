@@ -8,6 +8,8 @@
             </div>
 
             <script type="module">
+
+                // cloth image upload
                 import * as LR from 'https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.35.2/web/lr-file-uploader-regular.min.js';
                 LR.registerBlocks(LR);
 
@@ -18,9 +20,12 @@
 
                 function renderFiles(files) {
                     files.map(file => {
+
+                        // get url of uploaded file
                         var url = file.cdnUrl;
                         document.getElementsByClassName("image-upload")[0].value = url;
 
+                        // fetch AI prediction for top/bottom
                         fetch("https://clothrecog-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/7ef78a58-50bb-4e84-897d-f89dae45335d/classify/iterations/predict%20upper%20or%20lower/url", {
                             'method': 'POST',
                             'headers': {
@@ -31,6 +36,7 @@
                         })
                         .then(prediction => prediction.json())
                         .then(prediction => {
+                            // extract prediction data
                             console.log(prediction)
                             let lowerProbability = prediction.predictions.find(prediction => prediction.tagName === 'lower').probability;
                             let upperProbability = prediction.predictions.find(prediction => prediction.tagName === 'Upper').probability;
@@ -45,8 +51,8 @@
                         });
                     });
                 }
-
-
+                
+                // add cloth form validation
                 document.getElementById("add-cloth-form").addEventListener("click", function(e) {
                     e.preventDefault();
                     // image upload check
@@ -156,131 +162,117 @@
             <div id="error" class="alert alert-danger" role="alert">{{error}}</div>
         {{/if}}
 
-
         <div class="d-flex flex-row justify-content-between">
+            <div class="d-flex flex-column">
+                <h3>Outfits</h3>
+                {{#if outfits}}
+                <div class="d-flex flex-row flex-wrap">
+                    {{#if outfits.casual}}
+                    <div class="outfit">
+                        <div class="card" style="width: fit-content; margin: 0 20px 20px 0; padding: 0 20px;">
+                            <br>
+                            <h4 style="text-align:center;">Casual</h4>
+                            <br>
+                            <div class="d-flex flex-row">
+                                {{#each outfits.casual}}
+                                <div class="item d-flex flex-column justify-content-center align-items-center">
+                                    <img src="{{imageURL}}" alt="Cloth Image" height="200px">
+                                    <p style="margin: 0;">{{name}}</p>
+                                    <p style="margin: 0;">{{occasion}}</p>
+                                    <p style="margin: 0;">{{temperature}}°C</p>
+                                </div>
+                                {{/each}}
+                            </div>
+                            <br>
+                        </div>
+                    </div>
+                    {{/if}}
+
+                    {{#if outfits.formal}}
+                    <div class="outfit">
+                        <div class="card" style="width: fit-content; margin: 0 20px 20px 0; padding: 0 20px;">
+                            <br>
+                            <h4 style="text-align:center;">Formal</h4>
+                            <br>
+                            <div class="d-flex flex-row">
+                                {{#each outfits.formal}}
+                                <div class="item d-flex flex-column justify-content-center align-items-center">
+                                    <img src="{{imageURL}}" alt="Cloth Image" height="200px">
+                                    <p style="margin: 0;">{{name}}</p>
+                                    <p style="margin: 0;">{{occasion}}</p>
+                                    <p style="margin: 0;">{{temperature}}°C</p>
+                                </div>
+                                {{/each}}
+                            </div>
+                            <br>
+                        </div>
+                    </div>
+                    {{/if}}
+
+                    {{#if outfits.party}}
+                    <div class="outfit">
+                        <div class="card" style="width: fit-content; margin: 0 20px 20px 0; padding: 0 20px;">
+                            <br>
+                            <h4 style="text-align:center;">Party</h4>
+                            <br>
+                            <div class="d-flex flex-row">
+                                {{#each outfits.party}}
+                                <div class="item d-flex flex-column justify-content-center align-items-center">
+                                    <img src="{{imageURL}}" alt="Cloth Image" height="200px">
+                                    <p style="margin: 0;">{{name}}</p>
+                                    <p style="margin: 0;">{{occasion}}</p>
+                                    <p style="margin: 0;">{{temperature}}°C</p>
+                                </div>
+                                {{/each}}
+                            </div>
+                            <br>
+                        </div>
+                    </div>
+                    {{/if}}
+
+                    {{#if outfits.sports}}
+                    <div class="outfit">
+                        <div class="card" style="width: fit-content; margin: 0 20px 20px 0; padding: 0 20px;">
+                            <br>
+                            <h4 style="text-align:center;">Sports</h4>
+                            <br>
+                            <div class="d-flex flex-row">
+                                {{#each outfits.sports}}
+                                <div class="item d-flex flex-column justify-content-center align-items-center">
+                                    <img src="{{imageURL}}" alt="Cloth Image" height="200px">
+                                    <p style="margin: 0;">{{name}}</p>
+                                    <p style="margin: 0;">{{occasion}}</p>
+                                    <p style="margin: 0;">{{temperature}}°C</p>
+                                </div>
+                                {{/each}}
+                            </div>
+                            <br>
+                        </div>
+                    </div>
+                    {{/if}}
+                </div>
+                {{else}}
+                <p>No outfits found.</p>
+                <p><strong>Tips:</strong></p>
+                <ul id="tips">
+                    <li><a href="/wardrobe">Add more clothes</a> to generate outfits.</li>
+                    <li>Enable Location in <a href="/account">"My Account"</a> to view AI generated weather-based suggestions.</li>
+                </ul>
+                {{/if}}
+            </div>
             {{#if temp}}
-            <h3>Suggestions for Current Weather</h3>
-            <p><strong>Current Weather:</strong> <span id="temp">{{temp}}</span> °C</p>
-            {{else}}
-            <h3>Outfits</h3>
-            {{/if}}
-        </div>
-        {{#if temp}}
-        <br>
-        <div class="d-flex flex-row">
-            <div class="card" style="width: fit-content; margin: 0 20px 20px 0; border-radius: 10px; padding: 20px;">
-                <br>
-                <h5 style="text-align:center;">Suggestion</h5>
-                <br>
-            </div>
-            <div class="card" style="width: fit-content; margin: 0 20px 20px 0; border-radius: 10px; padding: 20px;">
-                <br>
-                <h5 style="text-align:center;">Suggestion</h5>
-                <br>
-            </div>
-            <div class="card" style="width: fit-content; margin: 0 20px 20px 0; border-radius: 10px; padding: 20px;">
-                <br>
-                <h5 style="text-align:center;">Suggestion</h5>
-                <br>
-            </div>
-        </div>
-        <br>
-        <h3>Outfits</h3>
-        {{/if}}
-        {{#if outfits}}
-        <div class="d-flex flex-row flex-wrap">
-            {{#if outfits.casual}}
-            <div class="outfit">
-                <div class="card" style="width: fit-content; margin: 0 20px 20px 0; padding: 0 20px;">
-                    <br>
-                    <h4 style="text-align:center;">Casual</h4>
-                    <br>
-                    <div class="d-flex flex-row">
-                        {{#each outfits.casual}}
-                        <div class="item d-flex flex-column justify-content-center align-items-center">
-                            <img src="{{imageURL}}" alt="Cloth Image" height="200px">
-                            <p style="margin: 0;">{{name}}</p>
-                            <p style="margin: 0;">{{occasion}}</p>
-                            <p style="margin: 0;">{{temperature}}°C</p>
-                        </div>
-                        {{/each}}
-                    </div>
-                    <br>
-                </div>
-            </div>
-            {{/if}}
-
-            {{#if outfits.formal}}
-            <div class="outfit">
-                <div class="card" style="width: fit-content; margin: 0 20px 20px 0; padding: 0 20px;">
-                    <br>
-                    <h4 style="text-align:center;">Formal</h4>
-                    <br>
-                    <div class="d-flex flex-row">
-                        {{#each outfits.formal}}
-                        <div class="item d-flex flex-column justify-content-center align-items-center">
-                            <img src="{{imageURL}}" alt="Cloth Image" height="200px">
-                            <p style="margin: 0;">{{name}}</p>
-                            <p style="margin: 0;">{{occasion}}</p>
-                            <p style="margin: 0;">{{temperature}}°C</p>
-                        </div>
-                        {{/each}}
-                    </div>
-                    <br>
-                </div>
-            </div>
-            {{/if}}
-
-            {{#if outfits.party}}
-            <div class="outfit">
-                <div class="card" style="width: fit-content; margin: 0 20px 20px 0; padding: 0 20px;">
-                    <br>
-                    <h4 style="text-align:center;">Party</h4>
-                    <br>
-                    <div class="d-flex flex-row">
-                        {{#each outfits.party}}
-                        <div class="item d-flex flex-column justify-content-center align-items-center">
-                            <img src="{{imageURL}}" alt="Cloth Image" height="200px">
-                            <p style="margin: 0;">{{name}}</p>
-                            <p style="margin: 0;">{{occasion}}</p>
-                            <p style="margin: 0;">{{temperature}}°C</p>
-                        </div>
-                        {{/each}}
-                    </div>
-                    <br>
-                </div>
-            </div>
-            {{/if}}
-
-            {{#if outfits.sports}}
-            <div class="outfit">
-                <div class="card" style="width: fit-content; margin: 0 20px 20px 0; padding: 0 20px;">
-                    <br>
-                    <h4 style="text-align:center;">Sports</h4>
-                    <br>
-                    <div class="d-flex flex-row">
-                        {{#each outfits.sports}}
-                        <div class="item d-flex flex-column justify-content-center align-items-center">
-                            <img src="{{imageURL}}" alt="Cloth Image" height="200px">
-                            <p style="margin: 0;">{{name}}</p>
-                            <p style="margin: 0;">{{occasion}}</p>
-                            <p style="margin: 0;">{{temperature}}°C</p>
-                        </div>
-                        {{/each}}
-                    </div>
-                    <br>
-                </div>
+            <div class="d-flex flex-column">
+                <p style="margin: 0;"><strong>Current Weather:</strong> <span id="temp">{{temp}}</span> °C</p>
+                <small>Humidity: {{user.weather.main.humidity}}</small>
+                <small>Wind: {{user.weather.wind.speed}}</small>
+                {{#each user.weather.weather}}
+                <small>Weather: {{main}}</small>
+                {{/each}}
+                <hr>
+                <p style="margin: 0;"><strong>AI Suggests to wear:</strong> {{user.suggestion}}</p>
             </div>
             {{/if}}
         </div>
-        {{else}}
-        <p>No outfits found.</p>
-        <p><strong>Tips:</strong></p>
-        <ul id="tips">
-            <li><a href="/wardrobe">Add more clothes</a> to generate outfits.</li>
-            <li>Enable Location in <a href="/account">"My Account"</a> to view AI generated weather-based suggestions.</li>
-        </ul>
-        {{/if}}
         <br>
     </div>
 
