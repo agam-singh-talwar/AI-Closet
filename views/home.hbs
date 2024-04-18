@@ -159,22 +159,32 @@
 
         <div class="d-flex flex-row justify-content-between">
             {{#if temp}}
-            <h3>Outfits</h3>
+            <h3>Suggestions for Current Weather</h3>
             <p><strong>Current Weather:</strong> <span id="temp">{{temp}}</span> °C</p>
             {{else}}
             <h3>Outfits</h3>
             {{/if}}
         </div>
         {{#if temp}}
-        <div class="d-flex flex-row flex-wrap">
-            <div class="outfit">
-                <div class="card" style="width: fit-content; margin: 0 20px 20px 0;">
-                    <br>
-                    <h4 style="text-align:center;">Casual</h4>
-                    <br>
-                </div>
+        <br>
+        <div class="d-flex flex-row">
+            <div class="card" style="width: fit-content; margin: 0 20px 20px 0; border-radius: 10px; padding: 20px;">
+                <br>
+                <h5 style="text-align:center;">Suggestion</h5>
+                <br>
+            </div>
+            <div class="card" style="width: fit-content; margin: 0 20px 20px 0; border-radius: 10px; padding: 20px;">
+                <br>
+                <h5 style="text-align:center;">Suggestion</h5>
+                <br>
+            </div>
+            <div class="card" style="width: fit-content; margin: 0 20px 20px 0; border-radius: 10px; padding: 20px;">
+                <br>
+                <h5 style="text-align:center;">Suggestion</h5>
+                <br>
             </div>
         </div>
+        <br>
         <h3>Outfits</h3>
         {{/if}}
         {{#if outfits}}
@@ -268,7 +278,7 @@
         <p><strong>Tips:</strong></p>
         <ul id="tips">
             <li><a href="/wardrobe">Add more clothes</a> to generate outfits.</li>
-            <li>Enable Location in <a href="/account">"My Account"</a> to view weather-based suggestions.</li>
+            <li>Enable Location in <a href="/account">"My Account"</a> to view AI generated weather-based suggestions.</li>
         </ul>
         {{/if}}
         <br>

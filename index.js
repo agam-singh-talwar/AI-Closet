@@ -5,6 +5,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
 const fs = require('fs');
+const axios = require('axios');
+const https = require('https');
 require("dotenv").config();
 
 // database setup
@@ -218,21 +220,27 @@ app.get("/account", ifAuthenticated, async (request, response) => {
     const longitude = request.query.lon;
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${OPENWEATHER_API_KEY}&units=metric`;
     try {
-      const res = await fetch(url);
-      const data = await res.json();
+      const agent = new https.Agent({
+        rejectUnauthorized: false
+      });
+      
+      const res = await axios.get(url, { httpsAgent: agent });
+      
+      const data = res.data;
       temp = Math.round(data.main.temp);
 
       let modifiedUser = { ...request.session.user };  // clone original without link
       modifiedUser.name = request.query.name;
       modifiedUser.email = request.query.email;
+      modifiedUser.location = data.name + ', ' + data.sys.country;
       modifiedUser.latitude = latitude;
       modifiedUser.longitude = longitude;
+
 
       response.status(200).render("account", {
         user: request.session.user,
         modifiedUser: modifiedUser,
-        title: "My Account",
-        location: data.name + ', ' + data.sys.country
+        title: "My Account"
       });
     } catch (err) {
       console.log(err);
@@ -254,7 +262,7 @@ app.get("/account", ifAuthenticated, async (request, response) => {
 
 // update account information request
 app.post("/account", ifAuthenticated, async (request, response) => {
-  const { name, email, lat, lon, newPass, currentPass } = request.body;
+  const { name, email, location, lat, lon, newPass, currentPass } = request.body;
   try {
     const user = await User.findOne({ email: request.session.user.email });
 
@@ -273,12 +281,13 @@ app.post("/account", ifAuthenticated, async (request, response) => {
 
         User.updateOne(
           { email: request.session.user.email },
-          { $set: { "name": name, "email": email, "password": hashedpass, "location": [{ "latitude": lat, "longitude": lon }] } }
+          { $set: { "name": name, "email": email, "password": hashedpass, "location": [{ "location": location, "latitude": lat, "longitude": lon }] } }
         ).then(() => {
 
           request.session.user = {
             name: user.name,
             email: user.email,
+            location: location,
             latitude: lat,
             longitude: lon,
             clauset: user.clauset
