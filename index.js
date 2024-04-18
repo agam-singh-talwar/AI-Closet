@@ -4,6 +4,7 @@ const sessions = require('client-sessions');
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
+const fs = require('fs');
 require("dotenv").config();
 
 // database setup
@@ -62,17 +63,24 @@ app.listen(PORT, () => {
 });
 
 //app routes
+var temp;
 
 // home page
 app.get("/", async (request, response) => {
 
   //renders home page with user if logged in
-  if (request.session.user)
+  if (request.session.user) {
+    let outfits = getOutfits(request.session.user.clauset);
+    if (outfits.casual.length == 0 && outfits.formal.length == 0 && outfits.party.length == 0 && outfits.sports.length == 0)
+      outfits = undefined;
+
     response.status(200).render("home", {
       user: request.session.user,
-      title: "Home"
+      title: "Home",
+      temp: temp,
+      outfits: outfits
     });
-
+  }
   // renders landing page if not logged in
   else
     response.status(200).render("index", {
@@ -84,6 +92,16 @@ app.get("/", async (request, response) => {
 // need to implement with AI
 app.post("/", ifAuthenticated, (request, response) => {
   // re-render home page with new outfits
+  let outfits = getOutfits(request.session.user.clauset);
+  if (outfits.casual.length == 0 && outfits.formal.length == 0 && outfits.party.length == 0 && outfits.sports.length == 0)
+    outfits = undefined;
+
+  response.status(200).render("home", {
+    user: request.session.user,
+    title: "Home",
+    temp: temp,
+    outfits: outfits
+  });
 });
 
 // login page
@@ -109,15 +127,35 @@ app.post("/login", ifNotAuthenticated, async (request, response) => {
       );
 
       if (isPasswordMatch) {
+        console.log(user)
         request.session.user = {
           name: user.name,
           email: user.email,
-          latitude: user.latitude,
-          longitude: user.longitude,
           clauset: user.clauset
         };
+
+        if (user.location[0]) {
+          request.session.user.latitude = user.location[0].latitude;
+          request.session.user.longitude = user.location[0].longitude;
+        }
+
         if (request.session.user.clauset == undefined)
           request.session.user.clauset = [];
+
+
+        try {
+          //get current weather
+          const latitude = request.session.user.latitude;
+          const longitude = request.session.user.longitude;
+          const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${OPENWEATHER_API_KEY}&units=metric`;
+          const res = await fetch(url);
+          const data = await res.json();
+          temp = Math.round(data.main.temp);
+        }
+        catch (err) {
+          console.log(err);
+        }
+
         response.status(200).redirect("/");
       } else {
         response.status(401).render("login", {
@@ -155,10 +193,11 @@ app.post("/signup", ifNotAuthenticated, async (request, response) => {
     request.session.user = {
       name: user.name,
       email: user.email,
-      latitude: user.latitude,
-      longitude: user.longitude,
+      latitude: user.location.latitude,
+      longitude: user.location.longitude,
       clauset: []
     };
+
     response.status(201).redirect("/");
   } catch (err) {
     console.log(err);
@@ -177,23 +216,11 @@ app.get("/account", ifAuthenticated, async (request, response) => {
   if (request.query.lat && request.query.lon) {
     const latitude = request.query.lat;
     const longitude = request.query.lon;
-    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${OPENWEATHER_API_KEY}`;
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${OPENWEATHER_API_KEY}&units=metric`;
     try {
       const res = await fetch(url);
       const data = await res.json();
-
-      let modifiedUser = { ...request.session.user };  // clone original without link
-      modifiedUser.name = request.query.name;
-      modifiedUser.email = request.query.email;
-      modifiedUser.latitude = latitude;
-      modifiedUser.longitude = longitude;
-
-      response.status(200).render("account", {
-        user: request.session.user,
-        modifiedUser: modifiedUser,
-        title: "My Account",
-        location: data.name + ', ' + data.sys.country
-      });
+      console.log(data);
     } catch (err) {
       console.log(err);
       response.status(500).render("account", {
@@ -328,10 +355,15 @@ app.get("/wardrobe", ifAuthenticated, async (request, response) => {
 
 // add cloth to the virtual wardrobe
 app.post("/cloth/add", ifAuthenticated, async (request, response) => {
-  const { name, color, type, occasion, temperature } = request.body;
+
   try {
+
+    // add cloth to the virtual wardrobe
+    const { imageURL, name, color, type, occasion, temperature } = request.body;
+
     // Create a new cloth object
     const cloth = {
+      imageURL,
       name,
       color,
       type,
@@ -345,10 +377,11 @@ app.post("/cloth/add", ifAuthenticated, async (request, response) => {
     // Update DB
     User.updateOne(
       { email: request.session.user.email },
-      { $set: { "clauset": request.session.user.clauset } }
-    ).then(() => {
-      response.status(201).redirect("/wardrobe?success=true");
-    });
+      {
+        $set: { "clauset": request.session.user.clauset }
+      }).then(() => {
+        response.status(201).redirect("/wardrobe?success=true");
+      })
   } catch (error) {
     response.status(500).redirect("/wardrobe?error=true");
   }
@@ -370,6 +403,7 @@ app.post("/cloth/edit/:id", ifAuthenticated, async (request, response) => {
     }).then(() => {
       response.status(200).redirect("/wardrobe?updated=true");
     });
+
   } catch (error) {
     response.status(500).redirect("/wardrobe?error=true");
   }
@@ -378,6 +412,7 @@ app.post("/cloth/edit/:id", ifAuthenticated, async (request, response) => {
 // delete cloth from the virtual wardrobe
 app.post("/cloth/delete/:id", ifAuthenticated, async (request, response) => {
   const { id } = request.params;
+  const { imageURL } = request.query;
 
   try {
     User.updateOne({ email: request.session.user.email }, { $pull: { clauset: { _id: id } } }).then(() => {
@@ -398,3 +433,74 @@ app.get("/logout", (request, response) => {
 app.get("/*", (request, response) => {
   response.status(404).render("page404", { title: "Not Found" });
 });
+
+const getOutfits = (clauset) => {
+  let CasualUpper = [], CasualLower = [], FormalUpper = [], FormalLower = [], PartyUpper = [], PartyLower = [], SportsUpper = [], SportsLower = [];
+  let casual = [], formal = [], party = [], sports = [];
+
+  clauset.forEach(cloth => {
+    if (temp && temp >= parseInt(cloth.temperature) - 10 && temp <= parseInt(cloth.temperature) + 10) {
+      if (cloth.occasion == "Casual") {
+        if (cloth.type == "Top")
+          CasualUpper.push(cloth);
+        else if (cloth.type == "Bottom")
+          CasualLower.push(cloth);
+      }
+      else if (cloth.occasion == "Formal") {
+        if (cloth.type == "Top")
+          FormalUpper.push(cloth);
+        else if (cloth.type == "Bottom")
+          FormalLower.push(cloth);
+      }
+      else if (cloth.occasion == "Party") {
+        if (cloth.type == "Top")
+          PartyUpper.push(cloth);
+        else if (cloth.type == "Bottom")
+          PartyLower.push(cloth);
+      }
+      else if (cloth.occasion == "Sports") {
+        if (cloth.type == "Top")
+          SportsUpper.push(cloth);
+        else if (cloth.type == "Bottom")
+          SportsLower.push(cloth);
+      }
+    } else if (temp == undefined) {
+      if (cloth.occasion == "Casual") {
+        if (cloth.type == "Top")
+          CasualUpper.push(cloth);
+        else if (cloth.type == "Bottom")
+          CasualLower.push(cloth);
+      }
+      else if (cloth.occasion == "Formal") {
+        if (cloth.type == "Top")
+          FormalUpper.push(cloth);
+        else if (cloth.type == "Bottom")
+          FormalLower.push(cloth);
+      }
+      else if (cloth.occasion == "Party") {
+        if (cloth.type == "Top")
+          PartyUpper.push(cloth);
+        else if (cloth.type == "Bottom")
+          PartyLower.push(cloth);
+      }
+      else if (cloth.occasion == "Sports") {
+        if (cloth.type == "Top")
+          SportsUpper.push(cloth);
+        else if (cloth.type == "Bottom")
+          SportsLower.push(cloth);
+      }
+    }
+  });
+
+  // select random bottom and top for each occasion
+  if (CasualUpper.length > 0 && CasualLower.length > 0)
+    casual.push(CasualUpper[Math.floor(Math.random() * CasualUpper.length)], CasualLower[Math.floor(Math.random() * CasualLower.length)]);
+  if (FormalUpper.length > 0 && FormalLower.length > 0)
+    formal.push(FormalUpper[Math.floor(Math.random() * FormalUpper.length)], FormalLower[Math.floor(Math.random() * FormalLower.length)]);
+  if (PartyUpper.length > 0 && PartyLower.length > 0)
+    party.push(PartyUpper[Math.floor(Math.random() * PartyUpper.length)], PartyLower[Math.floor(Math.random() * PartyLower.length)]);
+  if (SportsUpper.length > 0 && SportsLower.length > 0)
+    sports.push(SportsUpper[Math.floor(Math.random() * SportsUpper.length)], SportsLower[Math.floor(Math.random() * SportsLower.length)]);
+
+  return { casual, formal, party, sports };
+}

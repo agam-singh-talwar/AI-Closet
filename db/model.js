@@ -2,14 +2,18 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const clothSchema = new Schema({
+  imageURL: {
+    type: String,
+    required: true,
+  },
   name: {
     type: String,
     required: true,
   },
-  color: {
-    type: String,
-    required: true,
-  },
+  // color: {
+  //   type: String,
+  //   required: true,
+  // },
   //   type: upper or lower
   type: {
     type: String,

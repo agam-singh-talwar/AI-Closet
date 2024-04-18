@@ -6,21 +6,124 @@
                 <h1 class="modal-title fs-5" id="addClothModalLabel">Add New Cloth</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+
+            <script type="module">
+                import * as LR from 'https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.35.2/web/lr-file-uploader-regular.min.js';
+                LR.registerBlocks(LR);
+
+                const providerNode = document.getElementById('my-uploader-provider');
+                providerNode.addEventListener('change', event => {
+                    renderFiles(event.detail.allEntries.filter((file) => file.status === 'success'));
+                });
+
+                function renderFiles(files) {
+                    files.map(file => {
+                        var url = file.cdnUrl;
+                        document.getElementsByClassName("image-upload")[0].value = url;
+
+                        fetch("https://clothrecog-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/7ef78a58-50bb-4e84-897d-f89dae45335d/classify/iterations/predict%20upper%20or%20lower/url", {
+                            'method': 'POST',
+                            'headers': {
+                                'Prediction-Key': '5f0f9fcd5fe44a9993a61e553aef68de',
+                                'Content-Type': 'application/json'
+                            },
+                            'body': JSON.stringify({ Url: url })
+                        })
+                        .then(prediction => prediction.json())
+                        .then(prediction => {
+                            console.log(prediction)
+                            let lowerProbability = prediction.predictions.find(prediction => prediction.tagName === 'lower').probability;
+                            let upperProbability = prediction.predictions.find(prediction => prediction.tagName === 'Upper').probability;
+                            
+                            if (lowerProbability > upperProbability)
+                                document.querySelector('.type').value = 'Bottom';
+                            else
+                                document.querySelector('.type').value = 'Top';
+
+                            document.querySelector('.type').style = 'background-color: rgba(60, 179, 113, 0.25);';
+                            document.querySelector('#type-auto-detection').innerHTML = `<small><strong>*</strong> Detected by AI</small>`;
+                        });
+                    });
+                }
+
+
+                document.getElementById("add-cloth-form").addEventListener("click", function(e) {
+                    e.preventDefault();
+                    // image upload check
+                    if (document.getElementsByClassName("image-upload")[0].value == "") {
+                        document.getElementById("image-upload-alert").innerHTML = "Please upload an image.";
+                        return;
+                    } else {
+                        document.getElementById("image-upload-alert").innerHTML = "";
+                    }
+                    // name check
+                    if (document.getElementsByName("name")[0].value == "") {
+                        document.getElementById("name-alert").innerHTML = "Please enter a cloth name.";
+                        return;
+                    } else {
+                        document.getElementById("name-alert").innerHTML = "";
+                    }
+                    // type check
+                    if (document.getElementsByClassName("type")[0].value == "") {
+                        document.getElementById("type-alert").innerHTML = "Please select a type.";
+                        return;
+                    } else {
+                        document.getElementById("type-alert").innerHTML = "";
+                    }
+                    // occasion check
+                    if (document.getElementsByName("occasion")[0].value == "") {
+                        document.getElementById("occasion-alert").innerHTML = "Please select an occasion.";
+                        return;
+                    } else {
+                        document.getElementById("occasion-alert").innerHTML = "";
+                    }
+                    // temperature check
+                    if (document.getElementsByName("temperature")[0].value == "") {
+                        document.getElementById("temp-alert").innerHTML = "Please enter temperature.";
+                        return;
+                    }  else {
+                        document.getElementById("temp-alert").innerHTML = "";
+                    }
+                    // continue with form submission
+                    e.target.closest("form").submit();
+                });
+            </script>
+
             <form name="addCloth" method="post" action="/cloth/add">
                 <div class="modal-body" id="modal">
-                    <input type="file" class="form-control" name="image" accept="image/*">
+                    <lr-config
+                        ctx-name="my-uploader"
+                        pubkey="1071695858b8551e59c1"
+                        max-local-file-size-bytes="10000000"
+                        multiple-max="1"
+                        img-only="true"
+                    ></lr-config>
+                    <lr-file-uploader-minimal
+                        css-src="https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.35.2/web/lr-file-uploader-minimal.min.css"
+                        ctx-name="my-uploader"
+                        class="my-config"
+                    >
+                    </lr-file-uploader-minimal>
+                    <lr-upload-ctx-provider
+                        ctx-name="my-uploader"
+                        id="my-uploader-provider"
+                    ></lr-upload-ctx-provider>
+                    <input type="hidden" class="form-control image-upload" name="imageURL" required>
+                    <div style="text-align:center; color: red;" id="image-upload-alert"></div>
+                    <div style="text-align:center;"><small>Auto-detection is only for .png and .jpg formats.</small></div>
                     <br>
                     <input type="text" class="form-control" name="name" placeholder="Cloth Name" autocomplete="off" required>
+                    <div style="text-align:center; color: red;" id="name-alert"></div>
+                    {{!-- <br>
+                    <input type="text" class="form-control color" name="color" placeholder="Color" autocomplete="off" required> --}}
                     <br>
-                    <input type="text" class="form-control" name="color" placeholder="Color" required>
-                    <br>
-                    <select class="form-select" name="type" required>
+                    <select class="form-select type" name="type" required>
                         <option value="" selected disabled>Type</option>
                         <option value="Top">Top</option>
                         <option value="Bottom">Bottom</option>
-                        <option value="Footwear">Footwear</option>
-                        <option value="Accessories">Accessories</option>
                     </select>
+                    <div id="type-auto-detection"></div>
+                    <div style="text-align:center; color: red;" id="type-alert"></div>
                     <br>
                     <select class="form-select" name="occasion" required>
                         <option value="" selected disabled>Occasion</option>
@@ -29,12 +132,14 @@
                         <option value="Party">Party</option>
                         <option value="Sports">Sports</option>
                     </select>
+                    <div style="text-align:center; color: red;" id="occasion-alert"></div>
                     <br>
                     <input type="number" class="form-control" name="temperature" placeholder="Temperature to Wear (°C)" required>
+                    <div style="text-align:center; color: red;" id="temp-alert"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-dark">Add Cloth</button>
+                    <button type="submit" class="btn btn-dark" id="add-cloth-form">Add Cloth</button>
                 </div>
             </form>
         </div>
@@ -51,12 +156,123 @@
             <div id="error" class="alert alert-danger" role="alert">{{error}}</div>
         {{/if}}
 
-        <h3>Add more clothes to get outfit suggestions.</h3>
+
+        <div class="d-flex flex-row justify-content-between">
+            {{#if temp}}
+            <h3>Outfits</h3>
+            <p><strong>Current Weather:</strong> <span id="temp">{{temp}}</span> °C</p>
+            {{else}}
+            <h3>Outfits</h3>
+            {{/if}}
+        </div>
+        {{#if temp}}
+        <div class="d-flex flex-row flex-wrap">
+            <div class="outfit">
+                <div class="card" style="width: fit-content; margin: 0 20px 20px 0;">
+                    <br>
+                    <h4 style="text-align:center;">Casual</h4>
+                    <br>
+                </div>
+            </div>
+        </div>
+        <h3>Outfits</h3>
+        {{/if}}
+        {{#if outfits}}
+        <div class="d-flex flex-row flex-wrap">
+            {{#if outfits.casual}}
+            <div class="outfit">
+                <div class="card" style="width: fit-content; margin: 0 20px 20px 0;">
+                    <br>
+                    <h4 style="text-align:center;">Casual</h4>
+                    <br>
+                    <div class="d-flex flex-row">
+                        {{#each outfits.casual}}
+                        <div class="item d-flex flex-column justify-content-center align-items-center">
+                            <img src="{{imageURL}}" alt="Cloth Image" height="200px">
+                            <p style="margin: 0;">{{name}}</p>
+                            <p style="margin: 0;">{{occasion}}</p>
+                            <p style="margin: 0;">{{temperature}}°C</p>
+                        </div>
+                        {{/each}}
+                    </div>
+                    <br>
+                </div>
+            </div>
+            {{/if}}
+
+            {{#if outfits.formal}}
+            <div class="outfit">
+                <div class="card" style="width: fit-content; margin: 0 20px 20px 0;">
+                    <br>
+                    <h4 style="text-align:center;">Formal</h4>
+                    <br>
+                    <div class="d-flex flex-row">
+                        {{#each outfits.formal}}
+                        <div class="item d-flex flex-column justify-content-center align-items-center">
+                            <img src="{{imageURL}}" alt="Cloth Image" height="200px">
+                            <p style="margin: 0;">{{name}}</p>
+                            <p style="margin: 0;">{{occasion}}</p>
+                            <p style="margin: 0;">{{temperature}}°C</p>
+                        </div>
+                        {{/each}}
+                    </div>
+                    <br>
+                </div>
+            </div>
+            {{/if}}
+
+            {{#if outfits.party}}
+            <div class="outfit">
+                <div class="card" style="width: fit-content; margin: 0 20px 20px 0;">
+                    <br>
+                    <h4 style="text-align:center;">Party</h4>
+                    <br>
+                    <div class="d-flex flex-row">
+                        {{#each outfits.party}}
+                        <div class="item d-flex flex-column justify-content-center align-items-center">
+                            <img src="{{imageURL}}" alt="Cloth Image" height="200px">
+                            <p style="margin: 0;">{{name}}</p>
+                            <p style="margin: 0;">{{occasion}}</p>
+                            <p style="margin: 0;">{{temperature}}°C</p>
+                        </div>
+                        {{/each}}
+                    </div>
+                    <br>
+                </div>
+            </div>
+            {{/if}}
+
+            {{#if outfits.sports}}
+            <div class="outfit">
+                <div class="card" style="width: fit-content; margin: 0 20px 20px 0;">
+                    <br>
+                    <h4 style="text-align:center;">Sports</h4>
+                    <br>
+                    <div class="d-flex flex-row">
+                        {{#each outfits.sports}}
+                        <div class="item d-flex flex-column justify-content-center align-items-center">
+                            <img src="{{imageURL}}" alt="Cloth Image" height="200px">
+                            <p style="margin: 0;">{{name}}</p>
+                            <p style="margin: 0;">{{occasion}}</p>
+                            <p style="margin: 0;">{{temperature}}°C</p>
+                        </div>
+                        {{/each}}
+                    </div>
+                    <br>
+                </div>
+            </div>
+            {{/if}}
+        </div>
+        {{else}}
+        <p>No outfits found. Add more clothes to generate outfits. Enable Location in "My Account" to view weather-based suggestions.</p>
+        {{/if}}
         <br>
     </div>
 
     <div id="controls">
-        <button id="generate-outfits" class="btn btn-outline-dark">Re-Generate Outfits</button>
+        <form method="post" action="/">
+            <button id="generate-outfits" class="btn btn-outline-dark">Re-Generate Outfits</button>
+        </form>
         <button type="button" id="add-cloth-btn" 
             data-bs-toggle="modal" data-bs-target="#addClothModal">
             <h1 id="add-cloth">+</h1>

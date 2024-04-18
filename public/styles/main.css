@@ -281,6 +281,11 @@ li:hover {
     font-weight: 470;
 }
 
+#wardrobe img {
+    max-height: 200px;
+    object-fit: contain;
+}
+
 #wardrobe .card-text {
     margin: 0 !important;
 }
@@ -296,6 +301,13 @@ li:hover {
     border: none;
     background-color: transparent;
     padding: 0;
+}
+
+.my-config {
+    --darkmode: 0;
+    --h-accent: 223;
+    --s-accent: 100%;
+    --l-accent: 61%;
 }
 
 /* Footer */
