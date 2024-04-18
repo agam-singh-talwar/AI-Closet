@@ -220,7 +220,20 @@ app.get("/account", ifAuthenticated, async (request, response) => {
     try {
       const res = await fetch(url);
       const data = await res.json();
-      console.log(data);
+      temp = Math.round(data.main.temp);
+
+      let modifiedUser = { ...request.session.user };  // clone original without link
+      modifiedUser.name = request.query.name;
+      modifiedUser.email = request.query.email;
+      modifiedUser.latitude = latitude;
+      modifiedUser.longitude = longitude;
+
+      response.status(200).render("account", {
+        user: request.session.user,
+        modifiedUser: modifiedUser,
+        title: "My Account",
+        location: data.name + ', ' + data.sys.country
+      });
     } catch (err) {
       console.log(err);
       response.status(500).render("account", {

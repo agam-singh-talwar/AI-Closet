@@ -23,6 +23,16 @@ a {
     color: #fff;
 }
 
+#tips a {
+    color: black;
+}
+
+#tips a:hover {
+    text-decoration: underline;
+    text-underline-offset: 5px;
+}
+
+
 /*Navbar*/
 .anton-regular {
     font-family: "Anton", sans-serif;
@@ -96,12 +106,12 @@ a {
     font-weight: 700;
 }
 
-ul {
+ul:not(#tips) {
     list-style-type: none;
     padding: 0;
 }
 
-li {
+li:not(#tips li) {
     padding: 10px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgb(125, 125, 125);
@@ -109,7 +119,7 @@ li {
     transition: background-color 0.5s, color 0.5s;
 }
 
-li:hover {
+li:hover:not(#tips li) {
     background-color: rgb(255, 255, 255);
     color: rgb(40, 42, 40);
 }
