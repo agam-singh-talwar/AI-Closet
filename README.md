@@ -55,6 +55,12 @@ After a small amount of time as you upload an image of a cloth, you will see tha
 <br>
 <img src="https://github.com/dps970/final-project-mdmytrenko-astalwar/assets/79389256/9d710915-415b-471e-8959-10a04e174948" height="390">
 
+The way we get this AI prediction:
+- Step 1: Grab url of the uploaded image (once image is automatically uploaded to UploadCare service, so we grab this image's url that service).
+- Step 2: Send URL to the prediction model.
+- Step 3: Process the output object from the prediction model and set UI form input with get the tag name that has the highest probability.
+![image](https://github.com/dps970/final-project-mdmytrenko-astalwar/assets/79389256/f66cc6ba-b105-4be7-a062-555c67db2ac3)
+
 
 If you need, you can find clothes mock information in "[Clothes Mock Information](#clothes-mock-information)" section at the bottom for a quick application test.
 Fill out the rest of the information for the cloth and you will see that cloth has been added to your virtual wardrobe.
@@ -118,10 +124,19 @@ After you update account with your location, you can return back to the home pag
 <br>
 **AI USED:** You can witness the use of AI as it suggest you what you can think of wearing considering your weather conditions (weather, humidity, wind, etc).
 ![image](https://github.com/dps970/final-project-mdmytrenko-astalwar/assets/79389256/4df7c69a-8b92-49a3-8350-d552aa72ff30)
+
+There are a few steps to get this AI suggestion:
+- Step 1: Extract weather information received from Open Weather API
+- Step 2: Make a fetch to the AI model with the current weather conditions
+<img src="https://github.com/dps970/final-project-mdmytrenko-astalwar/assets/79389256/1a2b7171-84db-440f-9918-d13b7bd3a980" height="500">
+
+
 Also, note that outfits do not have clothes, which temperature is outside too far from the current temperature (for over 10 degrees). In our case, current weather temperature is 12 degrees, so there are not clothes outside of range ~[2 degrees, 22 degrees]. 
 <br>
 Let's test that can test that. If we ecit all clothes for Casual occasion to have temperature below 0, we should not be shown Casual outfit at all (since all clothes don't match current weather conditions).
-![Снимок экрана 2024-04-18 163936](https://github.com/dps970/final-project-mdmytrenko-astalwar/assets/79389256/f9df99b1-1d70-4760-a1e2-34d11d99f83e)
+![image](https://github.com/dps970/final-project-mdmytrenko-astalwar/assets/79389256/f9df99b1-1d70-4760-a1e2-34d11d99f83e)
+As discussed, we cannot see Casual outfit anymore as neigher of casual clothes match current weather conditions.
+![image](https://github.com/dps970/final-project-mdmytrenko-astalwar/assets/79389256/66655b20-7b3d-43d7-a24b-231b73f3f78a)
 
 
 
