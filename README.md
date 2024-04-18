@@ -34,6 +34,7 @@ Mock examples of information that you can input:
 After you have created account, you should see the main page of the application with your name on top.
 ![after-signup](https://github.com/dps970/final-project-mdmytrenko-astalwar/assets/79389256/5e9d8ea6-6d98-46cc-ad21-797c0d3730e4)
 
+<br><br><br>
 
 ### Adding Clothes (AI used)
 You won't see any outfits on the Home page as you don't have any clothes. Let's add some.
@@ -48,7 +49,7 @@ Option 2 (Click "Add New Cloth" button):
 In any case you will be presented with a modal asking you to enter cloth information.
 All fields are required and you are asked to upload a cloth image, enter its name, enter an occasion for which you feel comfortable wearing this cloth and enter a temperature under which you feel comfortable wearing this cloth.
 
-**AI USED** You can witness the use of AI when you appload an image of an item.
+**AI USED:** You can witness the use of AI when you appload an image of an item.
 After some small amount of time as you upload an image of a cloth, you will see that cloth type whether its "Top" or "Bottom" was identified. Note: auto detection only works for .png and .jpg images.
 <br>
 <img src="https://github.com/dps970/final-project-mdmytrenko-astalwar/assets/79389256/9d710915-415b-471e-8959-10a04e174948" height="380">
