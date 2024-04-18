@@ -456,73 +456,33 @@ app.get("/*", (request, response) => {
   response.status(404).render("page404", { title: "Not Found" });
 });
 
-const getOutfits = (clauset) => {
-  let CasualUpper = [], CasualLower = [], FormalUpper = [], FormalLower = [], PartyUpper = [], PartyLower = [], SportsUpper = [], SportsLower = [];
-  let casual = [], formal = [], party = [], sports = [];
+const getOutfits = (clauset, temp) => {
+  const occasions = {
+    Casual: { Top: [], Bottom: [] },
+    Formal: { Top: [], Bottom: [] },
+    Party: { Top: [], Bottom: [] },
+    Sports: { Top: [], Bottom: [] }
+  };
 
   clauset.forEach(cloth => {
-    if (temp && temp >= parseInt(cloth.temperature) - 10 && temp <= parseInt(cloth.temperature) + 10) {
-      if (cloth.occasion == "Casual") {
-        if (cloth.type == "Top")
-          CasualUpper.push(cloth);
-        else if (cloth.type == "Bottom")
-          CasualLower.push(cloth);
-      }
-      else if (cloth.occasion == "Formal") {
-        if (cloth.type == "Top")
-          FormalUpper.push(cloth);
-        else if (cloth.type == "Bottom")
-          FormalLower.push(cloth);
-      }
-      else if (cloth.occasion == "Party") {
-        if (cloth.type == "Top")
-          PartyUpper.push(cloth);
-        else if (cloth.type == "Bottom")
-          PartyLower.push(cloth);
-      }
-      else if (cloth.occasion == "Sports") {
-        if (cloth.type == "Top")
-          SportsUpper.push(cloth);
-        else if (cloth.type == "Bottom")
-          SportsLower.push(cloth);
-      }
-    } else if (temp == undefined) {
-      if (cloth.occasion == "Casual") {
-        if (cloth.type == "Top")
-          CasualUpper.push(cloth);
-        else if (cloth.type == "Bottom")
-          CasualLower.push(cloth);
-      }
-      else if (cloth.occasion == "Formal") {
-        if (cloth.type == "Top")
-          FormalUpper.push(cloth);
-        else if (cloth.type == "Bottom")
-          FormalLower.push(cloth);
-      }
-      else if (cloth.occasion == "Party") {
-        if (cloth.type == "Top")
-          PartyUpper.push(cloth);
-        else if (cloth.type == "Bottom")
-          PartyLower.push(cloth);
-      }
-      else if (cloth.occasion == "Sports") {
-        if (cloth.type == "Top")
-          SportsUpper.push(cloth);
-        else if (cloth.type == "Bottom")
-          SportsLower.push(cloth);
-      }
+    if ((!temp || (temp >= parseInt(cloth.temperature) - 10 && temp <= parseInt(cloth.temperature) + 10)) &&
+        ['Casual', 'Formal', 'Party', 'Sports'].includes(cloth.occasion)) {
+      occasions[cloth.occasion][cloth.type].push(cloth);
     }
   });
 
-  // select random bottom and top for each occasion
-  if (CasualUpper.length > 0 && CasualLower.length > 0)
-    casual.push(CasualUpper[Math.floor(Math.random() * CasualUpper.length)], CasualLower[Math.floor(Math.random() * CasualLower.length)]);
-  if (FormalUpper.length > 0 && FormalLower.length > 0)
-    formal.push(FormalUpper[Math.floor(Math.random() * FormalUpper.length)], FormalLower[Math.floor(Math.random() * FormalLower.length)]);
-  if (PartyUpper.length > 0 && PartyLower.length > 0)
-    party.push(PartyUpper[Math.floor(Math.random() * PartyUpper.length)], PartyLower[Math.floor(Math.random() * PartyLower.length)]);
-  if (SportsUpper.length > 0 && SportsLower.length > 0)
-    sports.push(SportsUpper[Math.floor(Math.random() * SportsUpper.length)], SportsLower[Math.floor(Math.random() * SportsLower.length)]);
+  const getRandomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-  return { casual, formal, party, sports };
-}
+  const outfits = {
+    casual: occasions.Casual.Top.length > 0 && occasions.Casual.Bottom.length > 0 ? 
+            [getRandomItem(occasions.Casual.Top), getRandomItem(occasions.Casual.Bottom)] : [],
+    formal: occasions.Formal.Top.length > 0 && occasions.Formal.Bottom.length > 0 ? 
+            [getRandomItem(occasions.Formal.Top), getRandomItem(occasions.Formal.Bottom)] : [],
+    party: occasions.Party.Top.length > 0 && occasions.Party.Bottom.length > 0 ? 
+            [getRandomItem(occasions.Party.Top), getRandomItem(occasions.Party.Bottom)] : [],
+    sports: occasions.Sports.Top.length > 0 && occasions.Sports.Bottom.length > 0 ? 
+            [getRandomItem(occasions.Sports.Top), getRandomItem(occasions.Sports.Bottom)] : []
+  };
+
+  return outfits;
+};
