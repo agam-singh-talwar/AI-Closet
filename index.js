@@ -73,7 +73,7 @@ app.get("/", async (request, response) => {
 
   //renders home page with user if logged in
   if (request.session.user) {
-    let outfits = getOutfits(request.session.user.clauset);
+    let outfits = getOutfits(request.session.user.clauset, temp);
     if (outfits.casual.length == 0 && outfits.formal.length == 0 && outfits.party.length == 0 && outfits.sports.length == 0)
       outfits = undefined;
 
@@ -95,7 +95,7 @@ app.get("/", async (request, response) => {
 // need to implement with AI
 app.post("/", ifAuthenticated, (request, response) => {
   // re-render home page with new outfits
-  let outfits = getOutfits(request.session.user.clauset);
+  let outfits = getOutfits(request.session.user.clauset, temp);
   if (outfits.casual.length == 0 && outfits.formal.length == 0 && outfits.party.length == 0 && outfits.sports.length == 0)
     outfits = undefined;
 
@@ -503,10 +503,10 @@ const getOutfits = (clauset, temp) => {
 
   // categorize clothes based on type, occasion & weather
   clauset.forEach(cloth => {
-    if ((!temp || (temp >= parseInt(cloth.temperature) - 10 && temp <= parseInt(cloth.temperature) + 10)) &&
-      ['Casual', 'Formal', 'Party', 'Sports'].includes(cloth.occasion)) {
+    if ((temp && temp >= parseInt(cloth.temperature) - 10 && temp <= parseInt(cloth.temperature) + 10)) {
       occasions[cloth.occasion][cloth.type].push(cloth);
-    }
+    } else if (temp == undefined)
+      occasions[cloth.occasion][cloth.type].push(cloth);
   });
 
   // randomly construct outfits from tops and bottoms for particular occasion
